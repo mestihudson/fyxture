@@ -1,0 +1,32 @@
+db.init().entity("pessoa").insert();
+
+pessoa(default):
+  id_pessoa: 1
+  id_estrutura_organizacional: 1
+  id_pais_origem: 1
+  id_uf_orgao_expedicao_rg: 
+  id_uf_naturalidade:
+  co_identificacao:
+  id_cargo:
+  no_pessoa:
+  no_guerra_pessoa:
+  in_sexo:
+  nr_rg:
+  sg_orgao_expedicao_rg:
+  dt_expedicao_rg:
+  tp_nacionalidade:
+  co_passaporte:
+  nr_registro_cnh:
+  in_categoria_cnh:
+  dt_validade_cnh:
+  dt_atualizacao_senha:
+  sn_ativo:
+  tx_funcao:
+  nr_matricula_funcional:
+  tx_local_arquivo_foto:
+  dt_nascimento:
+  aq_foto:
+  sn_administrador_geral:
+  sn_admin_senasp_titular:
+  sn_admin_senasp_substituto:
+  sn_cadastrador_estrut_org:
