@@ -1,4 +1,4 @@
-package br.gov.serpro.fix;
+package com.fyxture;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,10 +13,10 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
-public class Db {
-  private static Logger logger = Logger.getLogger(Db.class);
+public class Fyxture {
+  private static Logger logger = Logger.getLogger(Fyxture.class);
   private static Map<String, Object> map = new LinkedHashMap<String, Object>();
-  private static Db instance;
+  private static Fyxture instance;
   private static Connection connection;
   private static String driver;
   private static String url;
@@ -26,17 +26,17 @@ public class Db {
   private String entityname = null;
 private String entityfilter;
 
-  private Db(String driver, String url, String user, String password) {
+  private Fyxture(String driver, String url, String user, String password) {
     this.driver = driver;
     this.url = url;
     this.user = user;
     this.password = password;
   }
 
-  public static Db init() throws Throwable {
+  public static Fyxture init() throws Throwable {
 	//logger.info(m(get("init.cfg")));
     if(instance == null){
-      instance = new Db(
+      instance = new Fyxture(
         s(get("init.cfg","dev.driver")), 
         s(get("init.cfg","dev.url")),
         s(get("init.cfg","dev.user")),
@@ -96,18 +96,18 @@ private String entityfilter;
     return ((Map)v);
   }
 
-  public Db entity(String name, String filter) throws Throwable {
+  public Fyxture entity(String name, String filter) throws Throwable {
 	entityname = name;
 	entityfilter = filter;
 	entity = m(get(name.concat(".ent"))).get(filter);
 	return instance;
   }
 
-  public Db entity(String name) throws Throwable {
+  public Fyxture entity(String name) throws Throwable {
 	return entity(name, "default");
   }
 
-  public Db insert() throws Throwable {
+  public Fyxture insert() throws Throwable {
 	String command = String.format("INSERT INTO %s (%s) VALUES (%s);", entityname, columns(), values());
 	logger.info(command);
 	return instance;

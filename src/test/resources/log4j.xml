@@ -20,7 +20,7 @@
 		</layout>
 	</appender>
 
-	<category name="br.gov.serpro">
+	<category name="com.fyxture">
 		<priority value="${log.level}" />
 		<appender-ref ref="LOG-FILE" />
 		<appender-ref ref="LOG-CONSOLE" />
