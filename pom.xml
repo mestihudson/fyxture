@@ -20,11 +20,6 @@
       <artifactId>log4j</artifactId>
       <version>1.2.16</version>
     </dependency>
-	<dependency>
-	  <groupId>org.slf4j</groupId>
-	  <artifactId>slf4j-api</artifactId>
-	  <version>1.6.1</version>
-	</dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -41,5 +36,61 @@
       <artifactId>snakeyaml</artifactId>
       <version>1.14</version>
     </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.3.176</version>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-maven-plugin</artifactId>
+      <version>3.0</version>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!--build>
+    <plugins>
+      <plugin>
+          <groupId>org.flywaydb</groupId>
+          <artifactId>flyway-maven-plugin</artifactId>
+          <version>3.0</version>
+          <configuration>
+            <driver>org.h2.Driver</driver>
+            <url>jdbc:h2:tcp://localhost/~/blog</url>
+            <user>sa</user>
+            <password></password>
+            <schemas>
+              <schema>PUBLIC</schema>
+            </schemas>
+            <locations>
+              <location>filesystem:${basedir}/src/test/resources/db/migration</location>
+            </locations>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>validate</phase>
+              <goals>
+                <goal>clean</goal>
+                <goal>migrate</goal>
+                <goal>info</goal>
+              </goals>
+            </execution>
+          </executions>
+      </plugin>
+    </plugins>
+  </build-->
+
 </project>

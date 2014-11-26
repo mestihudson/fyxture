@@ -1,15 +1,17 @@
 ds:
   dev:
-    url: jdbc:oracle:thin:@//db.sinesp.bsa.serpro:1521/xe
-    driver: oracle.jdbc.driver.OracleDriver
-    user: seguranca
-    password: seguranca
+    url: jdbc:h2:tcp://localhost/~/blog
+    driver: org.h2.Driver
+    user: sa
+    password:
+
+entity:
+  suffix: ent
+  default:
+    descriptor: default
 
 entities:
-  pessoa:
-    default:
-      descriptor: default
-    sequence: 
-      name: sq_id_pessoa
-      column: id_pessoa
-    
+  livro:
+    sequence:
+      name: sq_id_livro
+      column: id
