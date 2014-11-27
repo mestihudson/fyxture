@@ -66,20 +66,35 @@ public class FyxtureTest {
 
   @Test public void insert() throws Throwable {
     Fyxture.insert("livro");
+<<<<<<< HEAD
     assert_have();
     assert_current_value_of_sequence_is(1);
+=======
+    assertHave();
+    assertCurrentValueOfSequenceIs(1);
+>>>>>>> 152b59ee8f69c3e21e46142a5fc448a1ad782ed9
   }
 
   @Test public void named_insert() throws Throwable {
     Fyxture.insert("livro", "festa-no-ceu");
+<<<<<<< HEAD
     assert_have();
     assert_current_value_of_sequence_is(2);
+=======
+    assertHave();
+    assertCurrentValueOfSequenceIs(2);
+>>>>>>> 152b59ee8f69c3e21e46142a5fc448a1ad782ed9
   }
 
   @Test public void insert_with_replacement() throws Throwable {
     Fyxture.insert("livro", Fyxture.pair("id", 3), Fyxture.pair("titulo", "O Senhor dos Anéis"));
+<<<<<<< HEAD
     assert_have();
     assert_current_value_of_sequence_is(3);
+=======
+    assertHave();
+    assertCurrentValueOfSequenceIs(3);
+>>>>>>> 152b59ee8f69c3e21e46142a5fc448a1ad782ed9
   }
 
   private void create() throws Throwable {
@@ -94,7 +109,11 @@ public class FyxtureTest {
     Assert.assertThat(statement.executeQuery("SELECT * FROM LIVRO").next(), Matchers.equalTo(true));
   }
 
+<<<<<<< HEAD
   private void assert_current_value_of_sequence_is(Integer value) throws Throwable {
+=======
+  private void assertCurrentValueOfSequenceIs(Integer value) throws Throwable {
+>>>>>>> 152b59ee8f69c3e21e46142a5fc448a1ad782ed9
     ResultSet rs = statement.executeQuery("SELECT CURRVAL('SQ_ID_LIVRO')");
     rs.next();
     Assert.assertThat(rs.getInt(1), Matchers.equalTo(value));
