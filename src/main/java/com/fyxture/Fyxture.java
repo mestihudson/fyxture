@@ -3,10 +3,12 @@ package com.fyxture;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.DriverManager;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -64,15 +66,21 @@ public class Fyxture {
     return rs.getInt(1);
   }
 
-  public static void insert(String entity) throws Throwable {
+
+  public static void insert(String entity) throws Throwable {    
+    String descriptor = s(get("init.cfg", "entity.default.descriptor"));
+    insert(entity, descriptor);
+  }
+
+  public static void insert(String entity, String descriptor) throws Throwable {
+    insert(entity, descriptor, new Pair[]{});
+  }
+
+  public static void insert(String entity, String descriptor, Pair... pair) throws Throwable {
     init();
     String suffix = s(get("init.cfg", "entity.suffix"));
-    String default_descriptor = s(get("init.cfg", "entity.default.descriptor"));
     String entitydes = String.format("%s.%s", entity, suffix);
-
-    logger.info(entitydes);
-    logger.info(default_descriptor);
-    Map c = m(get(entitydes, default_descriptor));
+    Map c = m(get(entitydes, descriptor));
     logger.info(c);
     String cols = "";
     String vals = "";
@@ -83,23 +91,28 @@ public class Fyxture {
       vals = vals.concat((vals.equals("") ? "" : ", ") + v);
     }
     String command = String.format(INSERT, entity, cols, vals);
-    logger.info(command);
     statement.executeUpdate(command);
-
-
-/*
-    String r = "";
-    for(Object k : m(o).keySet()){
-      Object v = m(o).get(k);
-      v = v instanceof String ? "'" + v + "'" : v;
-      String c = s(get("init.cfg", "entities." + entityname + ".sequence.column"));
-      String n = s(get("init.cfg", "entities." + entityname + ".sequence.name"));
-      v = v == null ? (c.equals(k.toString()) ? n.concat(".nextval") : v) : v;
-      r += r.length() == 0 ? v : ",".concat(v.toString());
-    }
-    return r;
-    */
+    logger.info(command);
   }
+
+  public static void insert(final String entity, final Pair... pairs) throws Throwable {
+    String descriptor = s(get("init.cfg", "entity.default.descriptor"));
+    insert(entity, descriptor, pairs);
+  }
+
+  public static Pair pair(String key, Object value) {
+    return new Pair(key, value);
+  }
+
+  private static class Pair {
+    String key;
+    Object value;
+
+    Pair(String key, Object value) {
+      this.key = key;
+      this.value = value;
+    }
+  } 
 
   private Fyxture(String driver, String url, String user, String password) throws Throwable {
     this.driver = driver;

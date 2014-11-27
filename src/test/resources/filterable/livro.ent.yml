@@ -3,3 +3,9 @@ default:
   version: 0
   titulo: Dom Casmurro
   ano: 1884
+
+festa-no-ceu:
+  id: 2
+  version: 0
+  titulo: Festa no Céu
+  ano: 2004
