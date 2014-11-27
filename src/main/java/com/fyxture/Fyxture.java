@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.DriverManager;
+import java.sql.ResultSetMetaData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,23 +29,17 @@ public class Fyxture {
   private static String url;
   private static String user;
   private static String password;
-  private Object entity = null;
-  private String entityname = null;
-  private String entityfilter;
 
   private static final String DELETE = "DELETE FROM %s;";
-  private static final String SEQUENCE_DROP = "DROP SEQUENCE %s;";
-  private static final String SEQUENCE_CREATE = "CREATE SEQUENCE %s START WITH 1 BELONGS_TO_TABLE;";
   private static final String SEQUENCE_ALTER = "ALTER SEQUENCE %s RESTART WITH 1;";
   private static final String COUNT = "SELECT COUNT(1) FROM %s;";
   private static final String INSERT = "INSERT INTO %s (%s) VALUES (%s);";
+  private static final String SELECT = "SELECT %s FROM %s WHERE %s;";
 
   public static void clear() throws Throwable {
     init();
     Map entities = m(get("init.cfg", "entities"));
     String tables = "";
-    String drop_sequences = "";
-    String create_sequences = "";
     String alter_sequences = "";
     for(Object key : entities.keySet()){
       tables = tables.concat(String.format(DELETE, key));
@@ -66,7 +61,6 @@ public class Fyxture {
     return rs.getInt(1);
   }
 
-
   public static void insert(String entity) throws Throwable {    
     String descriptor = s(get("init.cfg", "entity.default.descriptor"));
     insert(entity, descriptor);
@@ -76,8 +70,12 @@ public class Fyxture {
     insert(entity, descriptor, new Pair[]{});
   }
 
-  public static void insert(String entity, String descriptor, Pair... pair) throws Throwable {
+  public static void insert(String entity, String descriptor, Pair... pairs) throws Throwable {
     init();
+    Map<String, Object> decoded = new LinkedHashMap<String, Object>();
+    for(Pair pair : pairs){
+      decoded.put(pair.key, pair.value);
+    }
     String suffix = s(get("init.cfg", "entity.suffix"));
     String entitydes = String.format("%s.%s", entity, suffix);
     Map c = m(get(entitydes, descriptor));
@@ -86,7 +84,12 @@ public class Fyxture {
     String vals = "";
     for(Object key : c.keySet()){
       cols = cols.concat((cols.equals("") ? "" : ", ") + key);
-      Object v = c.get(key);
+      Object v = null;
+      if(decoded.containsKey(key)){
+        v = decoded.get(key);
+      }else{
+        v = c.get(key);
+      }
       v = v instanceof String ? "'" + v + "'" : v;
       vals = vals.concat((vals.equals("") ? "" : ", ") + v);
     }
@@ -100,11 +103,81 @@ public class Fyxture {
     insert(entity, descriptor, pairs);
   }
 
+  public static List<Map<String, Object>> select(final String entity, final Cols columns, final Where where) throws Throwable {
+    init();
+    List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+
+    String cols = "*";
+    for(String name : columns.names) {
+      if(cols.equals("*")){
+        cols = "1";
+      }
+      cols = cols + ", " + name;
+    }
+
+    String conditions_clause = where.clause == null ? "1=1" : where.clause;
+
+    String command = String.format(SELECT, cols, entity, conditions_clause);
+    logger.info(command);
+    ResultSet rs = statement.executeQuery(command);
+    ResultSetMetaData md = rs.getMetaData();
+    while(rs.next()){
+      Map<String, Object> line = new LinkedHashMap<String, Object>();
+      for(int i = 1; i <= md.getColumnCount(); i++){
+        line.put(md.getColumnName(i), rs.getObject(i));
+      }
+      result.add(line);
+    }
+    logger.info(result);
+    return result;
+  }
+
+  public static List<Map<String, Object>> select(final String entity) throws Throwable {
+    return select(entity, cols(), where(null));
+  }
+
+  public static List<Map<String, Object>> select(final String entity, final Cols cols) throws Throwable {
+    return select(entity, cols, where(null));
+  }
+
+  public static List<Map<String, Object>> select(final String entity, final Where where) throws Throwable {
+    return select(entity, cols(), where);
+  }
+
+  private static String quote(Object v) {
+    String result = "" + (v instanceof String ? "'" + v + "'" : v);
+    return result;
+  }
+
   public static Pair pair(String key, Object value) {
     return new Pair(key, value);
   }
 
-  private static class Pair {
+  public static Where where(String clause) {
+    return new Where(clause);
+  }
+
+  public static Cols cols(String... names) {
+    return new Cols(names);
+  }
+
+  static class Cols {
+    String [] names;
+
+    Cols(String... names) {
+      this.names = names;
+    }
+  }
+
+  static class Where {
+    String clause;
+
+    Where(String clause) {
+      this.clause = clause;
+    }
+  }
+
+  static class Pair {
     String key;
     Object value;
 
@@ -112,7 +185,7 @@ public class Fyxture {
       this.key = key;
       this.value = value;
     }
-  } 
+  }
 
   private Fyxture(String driver, String url, String user, String password) throws Throwable {
     this.driver = driver;
@@ -124,7 +197,7 @@ public class Fyxture {
     this.statement = this.connection.createStatement();
   }
 
-  public static Fyxture init() throws Throwable {
+  private static Fyxture init() throws Throwable {
     if(instance == null){
       instance = new Fyxture(
         s(get("init.cfg","ds.dev.driver")), 
@@ -184,43 +257,5 @@ public class Fyxture {
 
   private static Map m(Object v) {
     return ((Map)v);
-  }
-
-  public Fyxture entity(String name, String filter) throws Throwable {
-  	entityname = name;
-  	entityfilter = filter;
-  	entity = m(get(name.concat(".ent"))).get(filter);
-  	return instance;
-  }
-
-  public Fyxture entity(String name) throws Throwable {
-	 return entity(name, "default");
-  }
-
-  public Fyxture insert1() throws Throwable {
-  	String command = String.format("INSERT INTO %s (%s) VALUES (%s);", entityname, columns(), values());
-  	logger.info(command);
-  	return instance;
-  }
-
-  private String values() throws Throwable {
-  	String r = "";
-  	for(Object k : m(entity).keySet()){
-  		Object v = m(entity).get(k);
-  		v = v instanceof String ? "'" + v + "'" : v;
-  		String c = s(get("init.cfg", "entities." + entityname + ".sequence.column"));
-  		String n = s(get("init.cfg", "entities." + entityname + ".sequence.name"));
-  		v = v == null ? (c.equals(k.toString()) ? n.concat(".nextval") : v) : v;
-  		r += r.length() == 0 ? v : ",".concat(v.toString());
-  	}
-  	return r;
-  }
-
-  private String columns() {
-  	String r = "";
-  	for(Object k : m(entity).keySet()){
-  		r += r.length() == 0 ? k : ",".concat(k.toString());
-  	}
-  	return r;
   }
 }
