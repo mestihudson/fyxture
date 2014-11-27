@@ -1,0 +1,6 @@
+clear
+count(table)
+insert(table)
+insert(table, descriptor)
+insert(table, descriptor, pairs...)
+insert(table, pairs...)
