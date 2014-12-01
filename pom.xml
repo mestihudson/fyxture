@@ -46,13 +46,24 @@
       <artifactId>flyway-maven-plugin</artifactId>
       <version>3.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.oracle.db</groupId>
+      <artifactId>ojdbc6</artifactId>
+      <version>11.2.0.3</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/src/test/resources/unfilterable/ojdbc6-11.2.0.3.jar</systemPath>
+    </dependency>
   </dependencies>
 
   <build>
     <testResources>
       <testResource>
-        <directory>src/test/common/resources</directory>
+        <directory>src/test/resources/filterable</directory>
         <filtering>true</filtering>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources/unfilterable</directory>
+        <filtering>false</filtering>
       </testResource>
     </testResources>
     <plugins>

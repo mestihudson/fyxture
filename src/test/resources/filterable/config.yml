@@ -1,15 +1,25 @@
+common:
+  datasource:
+    default: h2
+
+  table:
+    suffix: table
+    default:
+      descriptor: default
+
 datasource:
-  url: jdbc:h2:target/blog
-  driver: org.h2.Driver
-  user: sa
-  password:
+  h2:
+    driver: org.h2.Driver
+    url: jdbc:h2:target/fyxture
+    user: sa
+    password:
+  oracle:
+    driver: oracle.jdbc.driver.OracleDriver
+    url: jdbc:oracle:thin:@//vm:1521/xe
+    user: fyxture
+    password: fyxture
 
 table:
-  suffix: table
-  default:
-    descriptor: default
-
-tables:
   livro:
     sequence:
       name: sq_id_livro

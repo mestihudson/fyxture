@@ -20,21 +20,33 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class FyxtureTest {
+public abstract class FyxtureTest {
   private static Logger logger = Logger.getLogger(FyxtureTest.class);
-  private static final String DRIVER = "org.h2.Driver";
-  private static final String URL = "jdbc:h2:target/blog";
-  private static final String USER = "sa";
-  private static final String PASSWORD = null;
+
+  private final String DRIVER;
+  private final String URL;
+  private final String USER;
+  private final String PASSWORD;
+  private final String DATASOURCE;
+
   private Connection connection = null;
   private Statement statement = null;
   private static Flyway flyway = null;
+
+  public FyxtureTest(String driver, String url, String user, String password, String datasource) {
+    DRIVER = driver;
+    URL = url;
+    USER = user;
+    PASSWORD = password;
+    DATASOURCE = datasource;
+  }
 
   @Before public void init() throws Throwable {
     reset();
     Class.forName(DRIVER).newInstance();
     connection = DriverManager.getConnection(URL, USER, PASSWORD);
     statement = connection.createStatement();
+    Fyxture.init(DATASOURCE);
     logger.debug(DRIVER);
   }
 
@@ -42,6 +54,7 @@ public class FyxtureTest {
     if(flyway == null){
       flyway = new Flyway();
       flyway.setDataSource(URL, USER, PASSWORD);
+      flyway.setSqlMigrationSuffix(".".concat(DATASOURCE).concat(".sql"));
     }
     flyway.clean();
     flyway.migrate();
@@ -147,7 +160,11 @@ public class FyxtureTest {
   }
 
   private void assert_current_value_of_sequence_is(Integer value) throws Throwable {
-    ResultSet rs = statement.executeQuery("SELECT CURRVAL('SQ_ID_LIVRO')");
+    String command = "SELECT CURRVAL('SQ_ID_LIVRO')";
+    if(DATASOURCE.equals("oracle")) {
+      command = "SELECT SQ_ID_LIVRO.CURRVAL FROM DUAL";
+    }
+    ResultSet rs = statement.executeQuery(command);
     rs.next();
     Assert.assertThat(rs.getInt(1), Matchers.equalTo(value));
   }
