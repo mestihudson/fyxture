@@ -1,0 +1,16 @@
+datasource:
+  url: jdbc:h2:target/blog
+  driver: org.h2.Driver
+  user: sa
+  password:
+
+table:
+  suffix: table
+  default:
+    descriptor: default
+
+tables:
+  livro:
+    sequence:
+      name: sq_id_livro
+      column: id

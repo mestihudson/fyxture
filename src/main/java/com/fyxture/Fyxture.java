@@ -38,47 +38,47 @@ public class Fyxture {
 
   public static void clear() throws Throwable {
     init();
-    Map entities = m(get("init.cfg", "entities"));
-    String tables = "";
+    Map tables = m(get("config", "tables"));
+    String tablenames = "";
     String alter_sequences = "";
-    for(Object key : entities.keySet()){
-      tables = tables.concat(String.format(DELETE, key));
+    for(Object key : tables.keySet()) {
+      tablenames = tablenames.concat(String.format(DELETE, key));
       try{
-        String sequence = s(get("init.cfg", String.format("entities.%s.sequence.name", key)));
+        String sequence = s(get("config", String.format("tables.%s.sequence.name", key)));
         alter_sequences = alter_sequences.concat(String.format(SEQUENCE_ALTER, sequence));
       }catch(Throwable t){}
     }
-    String command = tables.concat(alter_sequences);
+    String command = tablenames.concat(alter_sequences);
     logger.info(command);
     statement.executeUpdate(command);
   }
 
-  public static Integer count(String entity) throws Throwable {
+  public static Integer count(String table) throws Throwable {
     init();
-    String command = String.format(COUNT, entity);
+    String command = String.format(COUNT, table);
     ResultSet rs = statement.executeQuery(command);
     rs.next();
     return rs.getInt(1);
   }
 
-  public static void insert(String entity) throws Throwable {    
-    String descriptor = s(get("init.cfg", "entity.default.descriptor"));
-    insert(entity, descriptor);
+  public static void insert(String table) throws Throwable {    
+    String descriptor = s(get("config", "table.default.descriptor"));
+    insert(table, descriptor);
   }
 
-  public static void insert(String entity, String descriptor) throws Throwable {
-    insert(entity, descriptor, new Pair[]{});
+  public static void insert(String table, String descriptor) throws Throwable {
+    insert(table, descriptor, new Pair[]{});
   }
 
-  public static void insert(String entity, String descriptor, Pair... pairs) throws Throwable {
+  public static void insert(String table, String descriptor, Pair... pairs) throws Throwable {
     init();
     Map<String, Object> decoded = new LinkedHashMap<String, Object>();
     for(Pair pair : pairs){
       decoded.put(pair.key, pair.value);
     }
-    String suffix = s(get("init.cfg", "entity.suffix"));
-    String entitydes = String.format("%s.%s", entity, suffix);
-    Map c = m(get(entitydes, descriptor));
+    String suffix = s(get("config", "table.suffix"));
+    String tabledes = String.format("%s.%s", table, suffix);
+    Map c = m(get(tabledes, descriptor));
     logger.info(c);
     String cols = "";
     String vals = "";
@@ -93,17 +93,17 @@ public class Fyxture {
       v = v instanceof String ? "'" + v + "'" : v;
       vals = vals.concat((vals.equals("") ? "" : ", ") + v);
     }
-    String command = String.format(INSERT, entity, cols, vals);
+    String command = String.format(INSERT, table, cols, vals);
     statement.executeUpdate(command);
     logger.info(command);
   }
 
-  public static void insert(final String entity, final Pair... pairs) throws Throwable {
-    String descriptor = s(get("init.cfg", "entity.default.descriptor"));
-    insert(entity, descriptor, pairs);
+  public static void insert(final String table, final Pair... pairs) throws Throwable {
+    String descriptor = s(get("config", "table.default.descriptor"));
+    insert(table, descriptor, pairs);
   }
 
-  public static List<Map<String, Object>> select(final String entity, final Cols columns, final Where where) throws Throwable {
+  public static List<Map<String, Object>> select(final String table, final Cols columns, final Where where) throws Throwable {
     init();
     List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 
@@ -117,7 +117,7 @@ public class Fyxture {
 
     String conditions_clause = where.clause == null ? "1=1" : where.clause;
 
-    String command = String.format(SELECT, cols, entity, conditions_clause);
+    String command = String.format(SELECT, cols, table, conditions_clause);
     logger.info(command);
     ResultSet rs = statement.executeQuery(command);
     ResultSetMetaData md = rs.getMetaData();
@@ -132,16 +132,16 @@ public class Fyxture {
     return result;
   }
 
-  public static List<Map<String, Object>> select(final String entity) throws Throwable {
-    return select(entity, cols(), where(null));
+  public static List<Map<String, Object>> select(final String table) throws Throwable {
+    return select(table, cols(), where(null));
   }
 
-  public static List<Map<String, Object>> select(final String entity, final Cols cols) throws Throwable {
-    return select(entity, cols, where(null));
+  public static List<Map<String, Object>> select(final String table, final Cols cols) throws Throwable {
+    return select(table, cols, where(null));
   }
 
-  public static List<Map<String, Object>> select(final String entity, final Where where) throws Throwable {
-    return select(entity, cols(), where);
+  public static List<Map<String, Object>> select(final String table, final Where where) throws Throwable {
+    return select(table, cols(), where);
   }
 
   private static String quote(Object v) {
@@ -161,32 +161,6 @@ public class Fyxture {
     return new Cols(names);
   }
 
-  static class Cols {
-    String [] names;
-
-    Cols(String... names) {
-      this.names = names;
-    }
-  }
-
-  static class Where {
-    String clause;
-
-    Where(String clause) {
-      this.clause = clause;
-    }
-  }
-
-  static class Pair {
-    String key;
-    Object value;
-
-    Pair(String key, Object value) {
-      this.key = key;
-      this.value = value;
-    }
-  }
-
   private Fyxture(String driver, String url, String user, String password) throws Throwable {
     this.driver = driver;
     this.url = url;
@@ -200,10 +174,10 @@ public class Fyxture {
   private static Fyxture init() throws Throwable {
     if(instance == null){
       instance = new Fyxture(
-        s(get("init.cfg","ds.dev.driver")), 
-        s(get("init.cfg","ds.dev.url")),
-        s(get("init.cfg","ds.dev.user")),
-        s(get("init.cfg","ds.dev.password"))
+        s(get("config","datasource.driver")), 
+        s(get("config","datasource.url")),
+        s(get("config","datasource.user")),
+        s(get("config","datasource.password"))
       );
     }
     return instance;
@@ -211,7 +185,8 @@ public class Fyxture {
 
   private static Object load(String filename) throws Throwable {
     if(map.get(filename) == null) {
-      String filepath = "src/test/resources/filterable/" + filename + ".yml";
+      String filepath = Fyxture.class.getClassLoader().getResource(filename.concat(".yml")).getPath();
+      logger.info(filepath);
       InputStream input = new FileInputStream(new File(filepath));
       Yaml yaml = new Yaml();
       map.put(filename, yaml.load(input));
