@@ -32,8 +32,8 @@ public class Fyxture {
   private static final String DELETE = "DELETE FROM %s;";
   private static final String SEQUENCE_ALTER = "ALTER SEQUENCE %s RESTART WITH 1;";
   private static final String ORACLE_SEQUENCE_DROP = "DROP SEQUENCE %s;";
-  private static final String ORACLE_SEQUENCE_CREATE = "CREATE SEQUENCE %s MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER NOCYCLE;";
-  private static final String COUNT = "SELECT COUNT(1) FROM %s;";
+  private static final String ORACLE_SEQUENCE_CREATE = "CREATE SEQUENCE %s MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH %s CACHE 20 NOORDER NOCYCLE;";
+  private static final String COUNT = "SELECT COUNT(1) FROM %s";
   private static final String INSERT = "INSERT INTO %s (%s) VALUES (%s);";
   private static final String SELECT = "SELECT %s FROM %s WHERE %s;";
 
@@ -44,16 +44,7 @@ public class Fyxture {
     String alter_sequences = "";
     for(Object key : tables.keySet()) {
       tablenames = tablenames.concat(fmt(DELETE, key));
-      alter_sequences = sequence(key.toString());
-      // try{
-      //   String sequence = s(get("config", fmt("table.%s.sequence.name", key)));
-      //   if(datasource.equals("oracle")){
-      //     alter_sequences = alter_sequences.concat(fmt(ORACLE_SEQUENCE_DROP, sequence));
-      //     alter_sequences = alter_sequences.concat(fmt(ORACLE_SEQUENCE_CREATE, sequence));
-      //   }else{
-      //     alter_sequences = alter_sequences.concat(fmt(SEQUENCE_ALTER, sequence));
-      //   }
-      // }catch(Throwable t){}
+      alter_sequences = sequences(key.toString());
     }
     String command = tablenames.concat(alter_sequences);
     for(String cmd : command.split(";")){
@@ -62,13 +53,13 @@ public class Fyxture {
     }
   }
 
-  private static String sequence(String key) throws Throwable {
+  private static String sequences(String key) throws Throwable {
     String command = "";
     try{
       String sequence = s(get("config", fmt("table.%s.sequence.name", key)));
       if(datasource.equals("oracle")){
         command = command.concat(fmt(ORACLE_SEQUENCE_DROP, sequence));
-        command = command.concat(fmt(ORACLE_SEQUENCE_CREATE, sequence));
+        command = command.concat(fmt(ORACLE_SEQUENCE_CREATE, sequence, next(key)));
       }else{
         command = command.concat(fmt(SEQUENCE_ALTER, sequence));
       }
@@ -116,13 +107,20 @@ public class Fyxture {
       v = v instanceof String ? "'" + v + "'" : v;
       vals = vals.concat((vals.equals("") ? "" : ", ") + v);
     }
-    ;
-    String commands = cat(fmt(INSERT, table, cols, vals), "\n", fmt(ORACLE_SEQUENCE_DROP, table), "\n", fmt(ORACLE_SEQUENCE_CREATE, table));
+    String commands = cat(fmt(INSERT, table, cols, vals), "\n", fmt(ORACLE_SEQUENCE_DROP, sequence(table)), "\n", fmt(ORACLE_SEQUENCE_CREATE, sequence(table), next(table)));
     for(String command : commands.split("\n")){
       command = command.split(";")[0];
       logger.info(command);
       statement.execute(command);
     }
+  }
+
+  private static String sequence(String table) throws Throwable {
+    return s(get("config", fmt("table.%s.sequence.name", table)));
+  }
+
+  private static String next(String table) throws Throwable {
+    return String.valueOf(count(table) + 1);
   }
 
   private static String cat(String initial, String... parts) {
