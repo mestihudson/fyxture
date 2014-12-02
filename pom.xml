@@ -42,11 +42,6 @@
       <version>1.3.176</version>
     </dependency>
     <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-maven-plugin</artifactId>
-      <version>3.0</version>
-    </dependency>
-    <dependency>
       <groupId>com.oracle.db</groupId>
       <artifactId>ojdbc6</artifactId>
       <version>11.2.0.3</version>
@@ -99,6 +94,49 @@
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-maven-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <locations>
+            <location>filesystem:${basedir}/src/test/resources/filterable/db/migration</location>
+          </locations>
+        </configuration>
+        <executions>
+          <execution>
+            <id>h2</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>clean</goal>
+              <goal>migrate</goal>
+              <goal>info</goal>
+            </goals>
+            <configuration>
+              <driver>org.h2.Driver</driver>
+              <url>jdbc:h2:target/fyxture</url>
+              <user>sa</user>
+              <sqlMigrationSuffix>.h2.sql</sqlMigrationSuffix>
+            </configuration>
+          </execution>
+          <execution>
+            <id>oracle</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>clean</goal>
+              <goal>migrate</goal>
+              <goal>info</goal>
+            </goals>
+            <configuration>
+              <driver>oracle.jdbc.driver.OracleDriver</driver>
+              <url>jdbc:oracle:thin:@//vm:1521/xe</url>
+              <user>fyxture</user>
+              <password>fyxture</password>
+              <sqlMigrationSuffix>.oracle.sql</sqlMigrationSuffix>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

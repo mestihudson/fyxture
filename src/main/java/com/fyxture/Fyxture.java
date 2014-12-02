@@ -3,11 +3,13 @@ package com.fyxture;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.DriverManager;
 import java.sql.ResultSetMetaData;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -17,8 +19,11 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
+import static com.fyxture.Utils.*;
+
 public class Fyxture {
   private static Logger logger = Logger.getLogger(Fyxture.class);
+
   private static Map<String, Object> map = new LinkedHashMap<String, Object>();
   private static Fyxture instance;
   private static Connection connection = null;
@@ -29,28 +34,44 @@ public class Fyxture {
   private static String user;
   private static String password;
 
-  private static final String DELETE = "DELETE FROM %s;";
-  private static final String SEQUENCE_ALTER = "ALTER SEQUENCE %s RESTART WITH 1;";
-  private static final String ORACLE_SEQUENCE_DROP = "DROP SEQUENCE %s;";
-  private static final String ORACLE_SEQUENCE_CREATE = "CREATE SEQUENCE %s MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH %s CACHE 20 NOORDER NOCYCLE;";
+  private static final String DELETE = "DELETE FROM %s";
+  private static final String H2_SEQUENCE_ALTER = "ALTER SEQUENCE %s RESTART WITH %s";
+  private static final String ORACLE_SEQUENCE_DROP = "DROP SEQUENCE %s";
+  private static final String ORACLE_SEQUENCE_CREATE = "CREATE SEQUENCE %s MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH %s CACHE 20 NOORDER NOCYCLE";
   private static final String COUNT = "SELECT COUNT(1) FROM %s";
-  private static final String INSERT = "INSERT INTO %s (%s) VALUES (%s);";
-  private static final String SELECT = "SELECT %s FROM %s WHERE %s;";
+  private static final String INSERT = "INSERT INTO %s (%s) VALUES (%s)";
+  private static final String SELECT = "SELECT %s FROM %s WHERE %s";
+  private static final String NL = "\n";
 
   public static void clear() throws Throwable {
     init();
     Map tables = m(get("config", "table"));
-    String tablenames = "";
-    String alter_sequences = "";
-    for(Object key : tables.keySet()) {
-      tablenames = tablenames.concat(fmt(DELETE, key));
-      alter_sequences = sequences(key.toString());
+    logger.debug(tables);
+    for(Object table : tables.keySet()) {
+      delete(s(table));
+      reset_sequence(s(table));
     }
-    String command = tablenames.concat(alter_sequences);
-    for(String cmd : command.split(";")){
-      logger.info(cmd);
-      statement.execute(cmd);
+  }
+
+  private static void delete(String table) throws Throwable {
+    execute(fmt(DELETE, table));
+  }
+
+  private static void reset_sequence(String table) throws Throwable {
+    if(datasource.equals("h2")){
+      execute(fmt(H2_SEQUENCE_ALTER, sequence(table), "1"));
+      return;
     }
+    if(datasource.equals("oracle")){
+      execute(fmt(ORACLE_SEQUENCE_DROP, sequence(table)));
+      execute(fmt(ORACLE_SEQUENCE_CREATE, sequence(table), "1"));
+      return;
+    }
+    throw new IllegalStateException(fmt("Datasource unknow: %s", datasource));
+  }
+
+  private static void execute(String command) throws Throwable {
+    statement.execute(command);
   }
 
   private static String sequences(String key) throws Throwable {
@@ -61,7 +82,7 @@ public class Fyxture {
         command = command.concat(fmt(ORACLE_SEQUENCE_DROP, sequence));
         command = command.concat(fmt(ORACLE_SEQUENCE_CREATE, sequence, next(key)));
       }else{
-        command = command.concat(fmt(SEQUENCE_ALTER, sequence));
+        command = command.concat(fmt(H2_SEQUENCE_ALTER, sequence, next(key)));
       }
     }catch(Throwable t){}
     return command;
@@ -91,9 +112,9 @@ public class Fyxture {
     }
     String suffix = s(get("config", "common.table.suffix"));
     String tabledes = fmt("%s.%s", table, suffix);
-    logger.info(tabledes);
+    logger.debug(tabledes);
     Map c = m(get(tabledes, descriptor));
-    logger.info(c);
+    logger.debug(c);
     String cols = "";
     String vals = "";
     for(Object key : c.keySet()){
@@ -123,13 +144,6 @@ public class Fyxture {
     return String.valueOf(count(table) + 1);
   }
 
-  private static String cat(String initial, String... parts) {
-    for(String part : parts){
-      initial = initial.concat(part);
-    }
-    return initial;
-  }
-
   public static void insert(final String table, final Pair... pairs) throws Throwable {
     String descriptor = s(get("config", "common.table.default.descriptor"));
     insert(table, descriptor, pairs);
@@ -151,7 +165,7 @@ public class Fyxture {
 
     String command = fmt(SELECT, cols, table, conditions_clause);
     command = command.split(";")[0];
-    logger.info(command);
+    logger.debug(command);
     ResultSet rs = statement.executeQuery(command);
     ResultSetMetaData md = rs.getMetaData();
     while(rs.next()){
@@ -161,7 +175,7 @@ public class Fyxture {
       }
       result.add(line);
     }
-    logger.info(result);
+    logger.debug(result);
     return result;
   }
 
@@ -205,32 +219,30 @@ public class Fyxture {
   }
 
   public static Fyxture init() throws Throwable {
-    return init(s(get("config","common.datasource.default")));
+    return init(datasource == null ? s(get("config","common.datasource.default")) : datasource);
   }
 
-  public static Fyxture init(String datasourcename) throws Throwable {
-    if(instance == null){
-      if(datasource == null){
-        datasource = datasourcename;
-      }
-      instance = new Fyxture(
+  private static Fyxture getInstance() throws Throwable {
+      return new Fyxture(
         s(get("config", fmt("datasource.%s.driver", datasource))),
         s(get("config", fmt("datasource.%s.url", datasource))),
         s(get("config", fmt("datasource.%s.user", datasource))),
         s(get("config", fmt("datasource.%s.password", datasource)))
       );
-    }
-    return instance;
   }
 
-  private static String fmt(String format, Object... args) {
-    return String.format(format, args);
+  public static Fyxture init(String datasourcename) throws Throwable {
+    if(!datasourcename.equals(datasource)){
+      datasource = datasourcename;
+      instance = getInstance();
+    }
+    return instance;
   }
 
   private static Object load(String filename) throws Throwable {
     if(map.get(filename) == null) {
       String filepath = Fyxture.class.getClassLoader().getResource(filename.concat(".yml")).getPath();
-      logger.info(filepath);
+      logger.debug(filepath);
       InputStream input = new FileInputStream(new File(filepath));
       Yaml yaml = new Yaml();
       map.put(filename, yaml.load(input));
@@ -268,13 +280,5 @@ public class Fyxture {
     	re[n.indexOf(e)] = e;
     }
     return re;
-  }
-
-  private static String s(Object v) {
-    return ((String)v);
-  }
-
-  private static Map m(Object v) {
-    return ((Map)v);
   }
 }
