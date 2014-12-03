@@ -164,11 +164,11 @@ public abstract class FyxtureTest {
     Assert.assertThat(statement.executeQuery("SELECT * FROM LIVRO").next(), Matchers.equalTo(true));
   }
 
-  protected void assert_current_value_of_sequence_is(String command, Integer value) throws Throwable {
-    ResultSet rs = statement.executeQuery(command);
+  private void assert_current_value_of_sequence_is(Integer value) throws Throwable {
+    ResultSet rs = statement.executeQuery(get_command_for_assert_current_value_of_sequence_is());
     rs.next();
     Assert.assertThat(rs.getInt(1), Matchers.equalTo(value));
   }
 
-  protected abstract void assert_current_value_of_sequence_is(Integer value) throws Throwable;
+  protected abstract String get_command_for_assert_current_value_of_sequence_is() throws Throwable;
 }
