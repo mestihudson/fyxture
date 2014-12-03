@@ -130,7 +130,7 @@
             </goals>
             <configuration>
               <driver>oracle.jdbc.driver.OracleDriver</driver>
-              <url>jdbc:oracle:thin:@//vm:1521/xe</url>
+              <url>jdbc:oracle:thin:@//fyxture:1521/xe</url>
               <user>fyxture</user>
               <password>fyxture</password>
               <sqlMigrationSuffix>.oracle.sql</sqlMigrationSuffix>

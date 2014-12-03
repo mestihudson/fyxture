@@ -15,7 +15,7 @@ datasource:
     password:
   oracle:
     driver: oracle.jdbc.driver.OracleDriver
-    url: jdbc:oracle:thin:@//vm:1521/xe
+    url: jdbc:oracle:thin:@//fyxture:1521/xe
     user: fyxture
     password: fyxture
 
