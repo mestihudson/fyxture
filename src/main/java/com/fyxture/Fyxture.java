@@ -37,7 +37,9 @@ public class Fyxture {
   private static final String DELETE = "DELETE FROM %s";
   private static final String H2_SEQUENCE_ALTER = "ALTER SEQUENCE %s RESTART WITH %s";
   private static final String ORACLE_SEQUENCE_DROP = "DROP SEQUENCE %s";
-  private static final String ORACLE_SEQUENCE_CREATE = "CREATE SEQUENCE %s MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH %s CACHE 20 NOORDER NOCYCLE";
+  private static final String ORACLE_SEQUENCE_CREATE = "CREATE SEQUENCE %s MINVALUE %s MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH %s CACHE 20 NOORDER NOCYCLE";
+  private static final String ORACLE_SEQUENCE_NEXT = "SELECT %s.NEXTVAL FROM DUAL";
+  private static final String ORACLE_SEQUENCE_CURRENT = "SELECT %s.CURRVAL FROM DUAL";
   private static final String COUNT = "SELECT COUNT(1) FROM %s";
   private static final String INSERT = "INSERT INTO %s (%s) VALUES (%s)";
   private static final String SELECT = "SELECT %s FROM %s WHERE %s";
@@ -64,7 +66,7 @@ public class Fyxture {
     }
     if(datasource.equals("oracle")){
       execute(fmt(ORACLE_SEQUENCE_DROP, sequence(table)));
-      execute(fmt(ORACLE_SEQUENCE_CREATE, sequence(table), "1"));
+      execute(fmt(ORACLE_SEQUENCE_CREATE, sequence(table), "1", "1"));
       return;
     }
     throw new IllegalStateException(fmt("Datasource unknow: %s", datasource));
@@ -74,24 +76,9 @@ public class Fyxture {
     statement.execute(command);
   }
 
-  private static String sequences(String key) throws Throwable {
-    String command = "";
-    try{
-      String sequence = s(get("config", fmt("table.%s.sequence.name", key)));
-      if(datasource.equals("oracle")){
-        command = command.concat(fmt(ORACLE_SEQUENCE_DROP, sequence));
-        command = command.concat(fmt(ORACLE_SEQUENCE_CREATE, sequence, next(key)));
-      }else{
-        command = command.concat(fmt(H2_SEQUENCE_ALTER, sequence, next(key)));
-      }
-    }catch(Throwable t){}
-    return command;
-  }
-
   public static Integer count(String table) throws Throwable {
     init();
-    String command = fmt(COUNT, table);
-    ResultSet rs = statement.executeQuery(command);
+    ResultSet rs = query(fmt(COUNT, table));
     rs.next();
     return rs.getInt(1);
   }
@@ -106,42 +93,75 @@ public class Fyxture {
 
   public static void insert(String table, String descriptor, Pair... pairs) throws Throwable {
     init();
+
     Map<String, Object> decoded = new LinkedHashMap<String, Object>();
     for(Pair pair : pairs){
       decoded.put(pair.key, pair.value);
     }
-    String suffix = s(get("config", "common.table.suffix"));
-    String tabledes = fmt("%s.%s", table, suffix);
-    logger.debug(tabledes);
-    Map c = m(get(tabledes, descriptor));
+    logger.debug(decoded);
+
+    Map c = m(get(fmt("%s.%s", table, s(get("config", "common.table.suffix"))), descriptor));
     logger.debug(c);
+
+    logger.debug(m(get(table + ".table")));
+
+    List<String> columns = new ArrayList<String>();
+    List<Object> values = new ArrayList<Object>();
+    for(Object key : c.keySet()){
+      columns.add(s(key));
+      values.add(decoded.get(key) == null ? (c.get(key) == null ? null : c.get(key)) : decoded.get(key));
+    }
+    if(datasource.equals("oracle")){
+      String column = sequence(table, "column");
+      logger.debug(column);
+      if(column != null && !columns.contains(column)){
+        execute(fmt(ORACLE_SEQUENCE_NEXT, sequence(table)));
+        columns.add(column);
+        values.add(current(table));
+      }else{
+        logger.debug(values.get(columns.indexOf(column)));
+        if(values.get(columns.indexOf(column)) == null){
+          logger.info(column);
+          execute(fmt(ORACLE_SEQUENCE_NEXT, sequence(column)));
+          values.set(columns.indexOf(column), current(table));
+        }else{
+          Integer start = i(values.get(columns.indexOf(column)));
+          logger.debug(start);
+          execute(fmt(ORACLE_SEQUENCE_DROP, sequence(table)));
+          execute(fmt(ORACLE_SEQUENCE_CREATE, sequence(table), start, start));
+          execute(fmt(ORACLE_SEQUENCE_NEXT, sequence(table)));
+          values.set(columns.indexOf(column), current(table));
+        }
+      }
+    }
     String cols = "";
     String vals = "";
-    for(Object key : c.keySet()){
-      cols = cols.concat((cols.equals("") ? "" : ", ") + key);
-      Object v = null;
-      if(decoded.containsKey(key)){
-        v = decoded.get(key);
-      }else{
-        v = c.get(key);
-      }
-      v = v instanceof String ? "'" + v + "'" : v;
-      vals = vals.concat((vals.equals("") ? "" : ", ") + v);
+    for(String column : columns){
+      Object value = values.get(columns.indexOf(column));
+      cols = cat(cols, comma(cols) + column);
+      vals = cat(vals, comma(vals) + quote(value));
     }
-    String commands = cat(fmt(INSERT, table, cols, vals), "\n", fmt(ORACLE_SEQUENCE_DROP, sequence(table)), "\n", fmt(ORACLE_SEQUENCE_CREATE, sequence(table), next(table)));
-    for(String command : commands.split("\n")){
-      command = command.split(";")[0];
-      logger.info(command);
-      statement.execute(command);
-    }
+    String command = fmt(INSERT, table, cols, vals);
+    logger.info(command);
+    execute(command);
+  }
+
+  private static Integer current(String table) throws Throwable {
+    ResultSet rs = query(fmt(ORACLE_SEQUENCE_CURRENT, sequence(table)));
+    rs.next();
+    return rs.getInt(1);
+  }
+
+  private static ResultSet query(String command) throws Throwable {
+    return statement.executeQuery(command);
   }
 
   private static String sequence(String table) throws Throwable {
-    return s(get("config", fmt("table.%s.sequence.name", table)));
+    return sequence(table, "name");
   }
 
-  private static String next(String table) throws Throwable {
-    return String.valueOf(count(table) + 1);
+  private static String sequence(String table, String property) throws Throwable {
+    return s(get("config", fmt("table.%s.sequence.%s", table, property)));
   }
 
   public static void insert(final String table, final Pair... pairs) throws Throwable {
@@ -189,11 +209,6 @@ public class Fyxture {
 
   public static List<Map<String, Object>> select(final String table, final Where where) throws Throwable {
     return select(table, cols(), where);
-  }
-
-  private static String quote(Object v) {
-    String result = "" + (v instanceof String ? "'" + v + "'" : v);
-    return result;
   }
 
   public static Pair pair(String key, Object value) {

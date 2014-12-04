@@ -5,7 +5,10 @@ import static com.fyxture.Fyxture.pair;
 import static com.fyxture.Fyxture.where;
 import static com.fyxture.Utils.cat;
 import static com.fyxture.Utils.fmt;
+import static com.fyxture.Utils.i;
+import static com.fyxture.Utils.l;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -90,9 +93,9 @@ public abstract class FyxtureTest {
 
   @Test public void insert_with_replacement() throws Throwable {
     logger.debug("");
-    Fyxture.insert("livro", pair("id", 3), pair("titulo", "O Senhor dos Anéis"));
+    Fyxture.insert("livro", pair("id", null), pair("titulo", "O Senhor dos Anéis"));
     assert_have();
-    assert_current_value_of_sequence_is(3);
+    assert_current_value_of_sequence_is(1);
   }
 
   @Test public void named_insert_with_replacement() throws Throwable {
@@ -106,17 +109,17 @@ public abstract class FyxtureTest {
     logger.debug("");
     create();
     Map<String, Object> o = Fyxture.select("livro").get(0);
-    Assert.assertEquals(1L, o.get("ID"));
+    Assert.assertEquals(l(1l), l(o.get("ID").toString()));
     Assert.assertEquals("Dom Casmurro", o.get("TITULO"));
-    Assert.assertEquals(1885, o.get("ANO"));
-    Assert.assertEquals(0L, o.get("VERSION"));
+    Assert.assertEquals(l(1885), l(o.get("ANO").toString()));
+    Assert.assertEquals(l(0), l(o.get("VERSION").toString()));
   }
 
   @Test public void select_with_selected_cols() throws Throwable {
     logger.debug("");
     create();
     Map<String, Object> o = Fyxture.select("livro", cols("ano", "titulo", "id")).get(0);
-    Assert.assertEquals(1L, o.get("ID"));
+    Assert.assertEquals(1, o.get("ID"));
     Assert.assertEquals("Dom Casmurro", o.get("TITULO"));
     Assert.assertEquals(1885, o.get("ANO"));
     Assert.assertNull(o.get("VERSION"));
@@ -164,10 +167,18 @@ public abstract class FyxtureTest {
     Assert.assertThat(statement.executeQuery("SELECT * FROM LIVRO").next(), Matchers.equalTo(true));
   }
 
-  private void assert_current_value_of_sequence_is(Integer value) throws Throwable {
-    ResultSet rs = statement.executeQuery(get_command_for_assert_current_value_of_sequence_is());
+  protected void execute(String command) throws Throwable {
+    statement.execute(command);
+  }
+
+  protected ResultSet query(String command) throws Throwable {
+    return statement.executeQuery(command);
+  }
+
+  protected void assert_current_value_of_sequence_is(Integer value) throws Throwable {
+    ResultSet rs = query(get_command_for_assert_current_value_of_sequence_is());
     rs.next();
-    Assert.assertThat(rs.getInt(1), Matchers.equalTo(value));
+    Assert.assertThat(value, Matchers.equalTo(rs.getInt(1)));
   }
 
   protected abstract String get_command_for_assert_current_value_of_sequence_is() throws Throwable;

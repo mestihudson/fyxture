@@ -8,7 +8,15 @@ public class Utils {
   private static Logger logger = Logger.getLogger(Utils.class);
 
   public static String s(Object value) {
-    return ((String)value);
+    return value == null ? null : value.toString();
+  }
+
+  public static Integer i(Object value) {
+    return ((Integer)value);
+  }
+
+  public static Long l(Object value) {
+    return value == null ? null : new Long(value.toString());
   }
 
   public static Map m(Object value) {
@@ -26,5 +34,13 @@ public class Utils {
       initial = initial.concat(part);
     }
     return initial;
+  }
+
+  public static String quote(Object value) {
+    return "" + (value instanceof String ? "'" + value + "'" : value);
+  }
+
+  public static String comma(String value) throws Throwable {
+    return value == null || value.equals("") ? "" : ", ";
   }
 }
