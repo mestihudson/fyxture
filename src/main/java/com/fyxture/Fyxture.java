@@ -84,7 +84,7 @@ public class Fyxture {
   }
 
   public static void insert(String table) throws Throwable {    
-    insert(table, s(get("config", "common.table.default.descriptor")));
+    insert(table, s(get("config", "common.table.default")));
   }
 
   public static void insert(String table, String descriptor) throws Throwable {
@@ -165,7 +165,7 @@ public class Fyxture {
   }
 
   public static void insert(final String table, final Pair... pairs) throws Throwable {
-    String descriptor = s(get("config", "common.table.default.descriptor"));
+    String descriptor = s(get("config", "common.table.default"));
     insert(table, descriptor, pairs);
   }
 
