@@ -11,7 +11,6 @@ public class OracleTest extends FyxtureTest {
   }
 
   protected String get_command_for_assert_current_value_of_sequence_is() {
-    //return "SELECT MAX(ID) FROM LIVRO";
     return "SELECT SQ_ID_LIVRO.CURRVAL FROM DUAL";
   }
 }

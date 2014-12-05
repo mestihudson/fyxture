@@ -3,12 +3,8 @@ package com.fyxture;
 import static com.fyxture.Fyxture.cols;
 import static com.fyxture.Fyxture.pair;
 import static com.fyxture.Fyxture.where;
-import static com.fyxture.Utils.cat;
-import static com.fyxture.Utils.fmt;
-import static com.fyxture.Utils.i;
 import static com.fyxture.Utils.l;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -17,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.flywaydb.core.Flyway;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -26,14 +23,14 @@ import org.junit.Test;
 public abstract class FyxtureTest {
   private static Logger logger = Logger.getLogger(FyxtureTest.class);
 
-  private String DRIVER;
-  private String URL;
-  private String USER;
-  private String PASSWORD;
-  private String DATASOURCE;
+  protected String DRIVER;
+  protected String URL;
+  protected String USER;
+  protected String PASSWORD;
+  protected String DATASOURCE;
 
-  private Connection connection = null;
-  private Statement statement = null;
+  protected Connection connection = null;
+  protected Statement statement = null;
 
   public FyxtureTest(String driver, String url, String user, String password, String datasource) {
     DRIVER = driver;
@@ -49,6 +46,7 @@ public abstract class FyxtureTest {
     statement = connection.createStatement();
     logger.debug(DRIVER);
     logger.debug(connection);
+
     Fyxture.init(DATASOURCE);
   }
 
@@ -63,8 +61,22 @@ public abstract class FyxtureTest {
     }
   }
 
+  private void clear_db() throws Throwable {
+    Flyway flyway = new Flyway();
+    flyway.setDataSource(URL, USER, PASSWORD);
+    flyway.setSqlMigrationSuffix("." + DATASOURCE + ".sql");
+    flyway.clean();
+    flyway.migrate();
+    flyway.validate();
+    if(!DATASOURCE.equals("h2")){
+      logger.info("esperando...");
+      Thread.sleep(5 * 1000);
+    }
+  }
+
   @Test public void clear() throws Throwable {
     logger.debug("");
+    clear_db();
     create();
     Fyxture.clear();
     assert_cleaned();
@@ -72,13 +84,16 @@ public abstract class FyxtureTest {
 
   @Test public void count() throws Throwable {
     logger.debug("");
+    Fyxture.clear();
     Assert.assertThat(Fyxture.count("livro"), Matchers.equalTo(0));
+    Fyxture.clear();
     create();
     Assert.assertThat(Fyxture.count("livro"), Matchers.equalTo(1));
   }
 
   @Test public void insert() throws Throwable {
     logger.debug("");
+    Fyxture.clear();
     Fyxture.insert("livro");
     assert_have();
     assert_current_value_of_sequence_is(1);
@@ -86,6 +101,7 @@ public abstract class FyxtureTest {
 
   @Test public void named_insert() throws Throwable {
     logger.debug("");
+    Fyxture.clear();
     Fyxture.insert("livro", "festa-no-ceu");
     assert_have();
     assert_current_value_of_sequence_is(2);
@@ -93,6 +109,7 @@ public abstract class FyxtureTest {
 
   @Test public void insert_with_replacement() throws Throwable {
     logger.debug("");
+    Fyxture.clear();
     Fyxture.insert("livro", pair("id", null), pair("titulo", "O Senhor dos Anéis"));
     assert_have();
     assert_current_value_of_sequence_is(1);
@@ -100,6 +117,7 @@ public abstract class FyxtureTest {
 
   @Test public void named_insert_with_replacement() throws Throwable {
     logger.debug("");
+    Fyxture.clear();
     Fyxture.insert("livro", "festa-no-ceu", pair("titulo", "Game of Thrones"), pair("ano", 1996));
     assert_have();
     assert_current_value_of_sequence_is(2);
@@ -107,6 +125,7 @@ public abstract class FyxtureTest {
 
   @Test public void select() throws Throwable {
     logger.debug("");
+    Fyxture.clear();
     create();
     Map<String, Object> o = Fyxture.select("livro").get(0);
     Assert.assertEquals(l(1l), l(o.get("ID").toString()));
@@ -117,16 +136,18 @@ public abstract class FyxtureTest {
 
   @Test public void select_with_selected_cols() throws Throwable {
     logger.debug("");
+    Fyxture.clear();
     create();
     Map<String, Object> o = Fyxture.select("livro", cols("ano", "titulo", "id")).get(0);
-    Assert.assertEquals(1, o.get("ID"));
+    Assert.assertEquals(l(1l), l(o.get("ID").toString()));
     Assert.assertEquals("Dom Casmurro", o.get("TITULO"));
-    Assert.assertEquals(1885, o.get("ANO"));
+    Assert.assertEquals(l(1885), l(o.get("ANO").toString()));
     Assert.assertNull(o.get("VERSION"));
   }
 
   @Test public void select_with_selected_cols_and_conditions() throws Throwable {
     logger.debug("");
+    Fyxture.clear();
     create();
     create(2);
     List<Map<String, Object>> l = Fyxture.select("livro", where("id = 1"));
@@ -135,6 +156,7 @@ public abstract class FyxtureTest {
 
   @Test public void select_with_selected_cols_and_conditions_like() throws Throwable {
     logger.debug("");
+    Fyxture.clear();
     create(1, 0, 1948, "1984");
     create(2, 0, 1880, "Dom Casmurro");
     create(3, 0, 1890, "Câmara Cascudo");

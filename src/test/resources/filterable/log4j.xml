@@ -26,4 +26,10 @@
 		<appender-ref ref="LOG-CONSOLE" />
 	</category>
 
+	<category name="com.flyway">
+		<priority value="${log.level}" />
+		<appender-ref ref="LOG-FILE" />
+		<appender-ref ref="LOG-CONSOLE" />
+	</category>
+
 </log4j:configuration>

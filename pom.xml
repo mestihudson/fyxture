@@ -48,6 +48,11 @@
       <scope>system</scope>
       <systemPath>${basedir}/src/test/resources/unfilterable/ojdbc6-11.2.0.3.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+      <version>3.1</version>
+    </dependency>
   </dependencies>
 
   <build>
