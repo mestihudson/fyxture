@@ -24,6 +24,12 @@ datasource:
     url: jdbc:oracle:thin:@//fyxture:1521/xe
     user: fyxture
     password: fyxture
+  sqlserver:
+    dialect: sqlserver
+    driver: net.sourceforge.jtds.jdbc.Driver
+    url: jdbc:jtds:sqlserver://w7:1433/fyxture
+    user: sa
+    password: s3nh@
 
 sequence:
   -sq_id_livro
