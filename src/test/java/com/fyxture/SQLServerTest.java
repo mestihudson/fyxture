@@ -5,12 +5,13 @@ public class SQLServerTest extends FyxtureTest {
     super("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sqlserver://w7:1433/fyxture", "sa", "s3nh@", "sqlserver");
   }
 
-  protected void assert_current_value_of_sequence_is(Integer value) throws Throwable {
-    execute("SELECT SQ_ID_LIVRO.NEXTVAL FROM DUAL");
-    super.assert_current_value_of_sequence_is(value + 1);
+  protected void create(Integer id, Integer version, Integer ano, String titulo) throws Throwable {
+    execute("SET IDENTITY_INSERT LIVRO ON");
+    super.create(id, version, ano, titulo);
+    execute("SET IDENTITY_INSERT LIVRO OFF");
   }
 
   protected String get_command_for_assert_current_value_of_sequence_is() {
-    return "SELECT SQ_ID_LIVRO.CURRVAL FROM DUAL";
+    return "SELECT IDENT_CURRENT('LIVRO')";
   }
 }

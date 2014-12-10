@@ -35,11 +35,16 @@ public class Fyxture {
   private static String password;
 
   private static final String DELETE = "DELETE FROM %s";
+
   private static final String H2_SEQUENCE_ALTER = "ALTER SEQUENCE %s RESTART WITH %s";
+
   private static final String ORACLE_SEQUENCE_DROP = "DROP SEQUENCE %s";
   private static final String ORACLE_SEQUENCE_CREATE = "CREATE SEQUENCE %s MINVALUE %s MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH %s CACHE 20 NOORDER NOCYCLE";
   private static final String ORACLE_SEQUENCE_NEXT = "SELECT %s.NEXTVAL FROM DUAL";
   private static final String ORACLE_SEQUENCE_CURRENT = "SELECT %s.CURRVAL FROM DUAL";
+
+  private static final String SQLSERVER_SEQUENCE_ALTER = "DBCC CHECKIDENT ('%s', RESEED, %s)";
+
   private static final String COUNT = "SELECT COUNT(1) FROM %s";
   private static final String INSERT = "INSERT INTO %s (%s) VALUES (%s)";
   private static final String SELECT = "SELECT %s FROM %s WHERE %s";
@@ -69,10 +74,15 @@ public class Fyxture {
       execute(fmt(ORACLE_SEQUENCE_CREATE, sequence(table), "1", "1"));
       return;
     }
+    if(datasource.equals("sqlserver")){
+      execute(fmt(SQLSERVER_SEQUENCE_ALTER, table, "1", "1"));
+      return;
+    }
     throw new IllegalStateException(fmt("Datasource unknow: %s", datasource));
   }
 
   private static void execute(String command) throws Throwable {
+    logger.info(command);
     statement.execute(command);
   }
 
@@ -134,6 +144,7 @@ public class Fyxture {
         }
       }
     }
+    if(datasource.equals("sqlserver")){}
     String cols = "";
     String vals = "";
     for(String column : columns){

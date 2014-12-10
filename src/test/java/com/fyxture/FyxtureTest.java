@@ -4,6 +4,7 @@ import static com.fyxture.Fyxture.cols;
 import static com.fyxture.Fyxture.pair;
 import static com.fyxture.Fyxture.where;
 import static com.fyxture.Utils.l;
+import static com.fyxture.Utils.fmt;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -138,7 +139,7 @@ public abstract class FyxtureTest {
     logger.debug("");
     Fyxture.clear();
     create();
-    Map<String, Object> o = Fyxture.select("livro", cols("ano", "titulo", "id")).get(0);
+    Map<String, Object> o = Fyxture.select("LIVRO", cols("ANO", "TITULO", "ID")).get(0);
     Assert.assertEquals(l(1l), l(o.get("ID").toString()));
     Assert.assertEquals("Dom Casmurro", o.get("TITULO"));
     Assert.assertEquals(l(1885), l(o.get("ANO").toString()));
@@ -164,9 +165,9 @@ public abstract class FyxtureTest {
     Assert.assertEquals(2, l.size());
   }
 
-  private void create(Integer id, Integer version, Integer ano, String titulo) throws Throwable {
-    logger.debug(String.format("%d %d %d %s", id, version, ano, titulo));
-    statement.execute(String.format("INSERT INTO LIVRO (ID, VERSION, ANO, TITULO) VALUES (%d, %d, %d, '%s')", id, version, ano, titulo));
+  protected void create(Integer id, Integer version, Integer ano, String titulo) throws Throwable {
+    logger.debug(fmt("%d %d %d %s", id, version, ano, titulo));
+    statement.execute(fmt("INSERT INTO LIVRO (ID, VERSION, ANO, TITULO) VALUES (%d, %d, %d, '%s')", id, version, ano, titulo));
   }
 
   private void create(Integer id) throws Throwable {
@@ -190,6 +191,7 @@ public abstract class FyxtureTest {
   }
 
   protected void execute(String command) throws Throwable {
+    logger.debug(command);
     statement.execute(command);
   }
 
