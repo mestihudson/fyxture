@@ -15,16 +15,14 @@ abstract class Dialect {
 
   Dialect(Fyxture fyxture) {
     logger.info(fyxture);
-    fyxture = fyxture;
+    this.fyxture = fyxture;
   }
 
   void delete(String table) throws Throwable {
-    System.out.println(fyxture);
+	  logger.info(fyxture);
     logger.info(table);
     fyxture.execute(fmt(DELETE, table));
   }
-
-  abstract void reset_sequence(String table) throws Throwable;
 
   void insert(String table, List<String> columns, List<Object> values) throws Throwable {
     String cols = "";
@@ -38,4 +36,6 @@ abstract class Dialect {
     logger.info(command);
     fyxture.execute(command);
   }
+
+  abstract void reset_sequence(String table) throws Throwable;
 }

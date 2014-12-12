@@ -164,28 +164,23 @@ public class Fyxture {
   }
 
   private Fyxture(String driver, String url, String user, String password, String dialect) throws Throwable {
-    this.driver = driver;
-    this.url = url;
-    this.user = user;
-    this.password = password;
-    Class.forName(this.driver).newInstance();
-    this.connection = DriverManager.getConnection(this.url, this.user, this.password);
-    this.statement = this.connection.createStatement();
+    Class.forName(this.driver = driver).newInstance();
+    this.statement = (this.connection = DriverManager.getConnection(this.url = url, this.user = user, this.password = password)).createStatement();
     setDialect(dialect);
   }
 
   private void setDialect(String dialectDescriptor) {
     logger.info(dialectDescriptor);
     if(dialectDescriptor.equals("h2")){
-      dialect = new H2Dialect(instance);
+      dialect = new H2Dialect(this);
       return;
     }
     if(dialectDescriptor.equals("oracle")){
-      dialect = new OracleDialect(instance);
+      dialect = new OracleDialect(this);
       return;
     }
     if(dialectDescriptor.equals("sqlserver")){
-      dialect = new SQLServerDialect(instance);
+      dialect = new SQLServerDialect(this);
       return;
     }
     throw new IllegalArgumentException("Incorrect Dialect Code");
