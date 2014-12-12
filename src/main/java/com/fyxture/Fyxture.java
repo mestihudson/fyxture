@@ -33,20 +33,9 @@ public class Fyxture {
   private static String url;
   private static String user;
   private static String password;
-
-  private static final String DELETE = "DELETE FROM %s";
-
-  private static final String H2_SEQUENCE_ALTER = "ALTER SEQUENCE %s RESTART WITH %s";
-
-  private static final String ORACLE_SEQUENCE_DROP = "DROP SEQUENCE %s";
-  private static final String ORACLE_SEQUENCE_CREATE = "CREATE SEQUENCE %s MINVALUE %s MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH %s CACHE 20 NOORDER NOCYCLE";
-  private static final String ORACLE_SEQUENCE_NEXT = "SELECT %s.NEXTVAL FROM DUAL";
-  private static final String ORACLE_SEQUENCE_CURRENT = "SELECT %s.CURRVAL FROM DUAL";
-
-  private static final String SQLSERVER_SEQUENCE_ALTER = "DBCC CHECKIDENT ('%s', RESEED, %s)";
+  private static Dialect dialect;
 
   private static final String COUNT = "SELECT COUNT(1) FROM %s";
-  private static final String INSERT = "INSERT INTO %s (%s) VALUES (%s)";
   private static final String SELECT = "SELECT %s FROM %s WHERE %s";
   private static final String NL = "\n";
 
@@ -55,33 +44,12 @@ public class Fyxture {
     Map tables = m(get("config", "table"));
     logger.debug(tables);
     for(Object table : tables.keySet()) {
-      delete(s(table));
-      reset_sequence(s(table));
+      dialect.delete(s(table));
+      dialect.reset_sequence(s(table));
     }
   }
 
-  private static void delete(String table) throws Throwable {
-    execute(fmt(DELETE, table));
-  }
-
-  private static void reset_sequence(String table) throws Throwable {
-    if(datasource.equals("h2")){
-      execute(fmt(H2_SEQUENCE_ALTER, sequence(table), "1"));
-      return;
-    }
-    if(datasource.equals("oracle")){
-      execute(fmt(ORACLE_SEQUENCE_DROP, sequence(table)));
-      execute(fmt(ORACLE_SEQUENCE_CREATE, sequence(table), "1", "1"));
-      return;
-    }
-    if(datasource.equals("sqlserver")){
-      execute(fmt(SQLSERVER_SEQUENCE_ALTER, table, "1", "1"));
-      return;
-    }
-    throw new IllegalStateException(fmt("Datasource unknow: %s", datasource));
-  }
-
-  private static void execute(String command) throws Throwable {
+  void execute(String command) throws Throwable {
     logger.info(command);
     statement.execute(command);
   }
@@ -121,57 +89,18 @@ public class Fyxture {
       columns.add(s(key));
       values.add(decoded.get(key) == null ? (c.get(key) == null ? null : c.get(key)) : decoded.get(key));
     }
-    if(datasource.equals("oracle")){
-      String column = sequence(table, "column");
-      logger.debug(column);
-      if(column != null && !columns.contains(column)){
-        execute(fmt(ORACLE_SEQUENCE_NEXT, sequence(table)));
-        columns.add(column);
-        values.add(current(table));
-      }else{
-        logger.debug(values.get(columns.indexOf(column)));
-        if(values.get(columns.indexOf(column)) == null){
-          logger.info(column);
-          execute(fmt(ORACLE_SEQUENCE_NEXT, sequence(column)));
-          values.set(columns.indexOf(column), current(table));
-        }else{
-          Integer start = i(values.get(columns.indexOf(column)));
-          logger.debug(start);
-          execute(fmt(ORACLE_SEQUENCE_DROP, sequence(table)));
-          execute(fmt(ORACLE_SEQUENCE_CREATE, sequence(table), start, start));
-          execute(fmt(ORACLE_SEQUENCE_NEXT, sequence(table)));
-          values.set(columns.indexOf(column), current(table));
-        }
-      }
-    }
-    if(datasource.equals("sqlserver")){}
-    String cols = "";
-    String vals = "";
-    for(String column : columns){
-      Object value = values.get(columns.indexOf(column));
-      cols = cat(cols, comma(cols) + column);
-      vals = cat(vals, comma(vals) + quote(value));
-    }
-    String command = fmt(INSERT, table, cols, vals);
-    logger.info(command);
-    execute(command);
+    dialect.insert(table, columns, values);
   }
 
-  private static Integer current(String table) throws Throwable {
-    ResultSet rs = query(fmt(ORACLE_SEQUENCE_CURRENT, sequence(table)));
-    rs.next();
-    return rs.getInt(1);
-  }
-
-  private static ResultSet query(String command) throws Throwable {
+  static ResultSet query(String command) throws Throwable {
     return statement.executeQuery(command);
   }
 
-  private static String sequence(String table) throws Throwable {
+  String sequence(String table) throws Throwable {
     return sequence(table, "name");
   }
 
-  private static String sequence(String table, String property) throws Throwable {
+  String sequence(String table, String property) throws Throwable {
     return s(get("config", fmt("table.%s.sequence.%s", table, property)));
   }
 
@@ -234,7 +163,7 @@ public class Fyxture {
     return new Cols(names);
   }
 
-  private Fyxture(String driver, String url, String user, String password) throws Throwable {
+  private Fyxture(String driver, String url, String user, String password, String dialect) throws Throwable {
     this.driver = driver;
     this.url = url;
     this.user = user;
@@ -242,26 +171,49 @@ public class Fyxture {
     Class.forName(this.driver).newInstance();
     this.connection = DriverManager.getConnection(this.url, this.user, this.password);
     this.statement = this.connection.createStatement();
+    setDialect(dialect);
+  }
+
+  private void setDialect(String dialectDescriptor) {
+    logger.info(dialectDescriptor);
+    if(dialectDescriptor.equals("h2")){
+      dialect = new H2Dialect(instance);
+      return;
+    }
+    if(dialectDescriptor.equals("oracle")){
+      dialect = new OracleDialect(instance);
+      return;
+    }
+    if(dialectDescriptor.equals("sqlserver")){
+      dialect = new SQLServerDialect(instance);
+      return;
+    }
+    throw new IllegalArgumentException("Incorrect Dialect Code");
   }
 
   public static Fyxture init() throws Throwable {
-    return init(datasource == null ? s(get("config","common.datasource.default")) : datasource);
+    String ds = datasource == null ? s(get("config","common.datasource.default")) : datasource;
+    logger.info(ds);
+    return init(ds);
   }
 
   private static Fyxture getInstance() throws Throwable {
-      return new Fyxture(
-        s(get("config", fmt("datasource.%s.driver", datasource))),
-        s(get("config", fmt("datasource.%s.url", datasource))),
-        s(get("config", fmt("datasource.%s.user", datasource))),
-        s(get("config", fmt("datasource.%s.password", datasource)))
-      );
+    return new Fyxture(
+      s(get("config", fmt("datasource.%s.driver", datasource))),
+      s(get("config", fmt("datasource.%s.url", datasource))),
+      s(get("config", fmt("datasource.%s.user", datasource))),
+      s(get("config", fmt("datasource.%s.password", datasource))),
+      s(get("config", fmt("datasource.%s.dialect", datasource)))
+    );
   }
 
   public static Fyxture init(String datasourcename) throws Throwable {
+    logger.info(datasourcename);
     if(!datasourcename.equals(datasource)){
       datasource = datasourcename;
       instance = getInstance();
     }
+    logger.info(instance);
     return instance;
   }
 

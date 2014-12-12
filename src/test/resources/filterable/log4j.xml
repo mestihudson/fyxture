@@ -21,13 +21,13 @@
 	</appender>
 
 	<category name="com.fyxture">
-		<priority value="${log.level}" />
+		<priority value="${log}" />
 		<appender-ref ref="LOG-FILE" />
 		<appender-ref ref="LOG-CONSOLE" />
 	</category>
 
 	<category name="com.flyway">
-		<priority value="${log.level}" />
+		<priority value="${log}" />
 		<appender-ref ref="LOG-FILE" />
 		<appender-ref ref="LOG-CONSOLE" />
 	</category>
