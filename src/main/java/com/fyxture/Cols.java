@@ -1,9 +1,9 @@
 package com.fyxture;
 
 class Cols {
-    String [] names;
+  String [] names;
 
-    Cols(String... names) {
-      this.names = names;
-    }
+  Cols(String... names) {
+    this.names = names;
   }
+}

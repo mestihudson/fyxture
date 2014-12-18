@@ -1,9 +1,9 @@
 package com.fyxture;
 
 class Where {
-    String clause;
+  String clause;
 
-    Where(String clause) {
-      this.clause = clause;
-    }
+  Where(String clause) {
+    this.clause = clause;
   }
+}
