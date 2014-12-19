@@ -37,5 +37,6 @@ sequence:
 table:
   livro:
     sequence:
+      #sq_id_livro: id
       name: sq_id_livro
       column: id

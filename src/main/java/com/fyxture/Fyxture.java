@@ -61,15 +61,17 @@ public class Fyxture {
     return rs.getInt(1);
   }
 
-  public static void insert(String table) throws Throwable {    
+  public static Fyxture insert(String table) throws Throwable {    
     insert(table, s(get("config", "common.table.default")));
+    return instance;
   }
 
-  public static void insert(String table, String descriptor) throws Throwable {
+  public static Fyxture insert(String table, String descriptor) throws Throwable {
     insert(table, descriptor, new Pair[]{});
+    return instance;
   }
 
-  public static void insert(String table, String descriptor, Pair... pairs) throws Throwable {
+  public static Fyxture insert(String table, String descriptor, Pair... pairs) throws Throwable {
     init();
 
     Map<String, Object> decoded = new LinkedHashMap<String, Object>();
@@ -90,6 +92,7 @@ public class Fyxture {
       values.add(decoded.get(key) == null ? (c.get(key) == null ? null : c.get(key)) : decoded.get(key));
     }
     dialect.insert(table, columns, values);
+    return instance;
   }
 
   static ResultSet query(String command) throws Throwable {
@@ -104,9 +107,10 @@ public class Fyxture {
     return s(get("config", fmt("table.%s.sequence.%s", table, property)));
   }
 
-  public static void insert(final String table, final Pair... pairs) throws Throwable {
+  public static Fyxture insert(final String table, final Pair... pairs) throws Throwable {
     String descriptor = s(get("config", "common.table.default"));
     insert(table, descriptor, pairs);
+    return instance;
   }
 
   public static List<Map<String, Object>> select(final String table, final Cols columns, final Where where) throws Throwable {
