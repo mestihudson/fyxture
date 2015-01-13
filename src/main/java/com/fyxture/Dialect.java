@@ -19,7 +19,7 @@ abstract class Dialect {
   }
 
   void delete(String table) throws Throwable {
-	  logger.info(fyxture);
+    logger.info(fyxture);
     logger.info(table);
     fyxture.execute(fmt(DELETE, table));
   }

@@ -1,7 +1,9 @@
 package com.fyxture;
 
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 public class Utils {
@@ -23,6 +25,10 @@ public class Utils {
     return ((Map)value);
   }
 
+  public static List list(Object value) {
+    return ((List)value);
+  }
+
   public static String fmt(String value, Object... args) {
     logger.debug(value);
     logger.debug(args.length);
@@ -37,7 +43,23 @@ public class Utils {
   }
 
   public static String quote(Object value) {
-    return "" + (value instanceof String ? "'" + value + "'" : value);
+    return "" + (value instanceof String ? literal(value) : value);
+  }
+
+  public static String literal(Object value) {
+	String svalue = s(value);
+	String [] all = svalue.split("'");
+	svalue = all.length > 1 ? (StringUtils.join(all, "''") + (svalue.charAt(svalue.length() - 1) == '\'' ? "''" : "")) : svalue;
+	String result = "'" + svalue + "'";
+	switch(svalue.charAt(0)){
+	  case '$':
+		result = svalue.substring(1);
+		break;
+	  case '\\':
+		result = "'" + svalue.substring(1) + "'";
+		break;
+	}
+	return result;
   }
 
   public static String comma(String value) throws Throwable {

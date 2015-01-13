@@ -4,7 +4,7 @@
 
   <groupId>com.fyxture</groupId>
   <artifactId>fyxture</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>fyxture</name>
@@ -13,6 +13,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <log>error</log>
+    <skip.oracle>false</skip.oracle>
+    <skip.h2>false</skip.h2>
+    <skip.sqlserver>false</skip.sqlserver>
   </properties>
 
   <dependencies>
@@ -37,6 +40,11 @@
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <version>1.14</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.6</version>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
@@ -133,6 +141,7 @@
               <url>jdbc:h2:target/fyxture</url>
               <user>sa</user>
               <sqlMigrationSuffix>.h2.sql</sqlMigrationSuffix>
+              <skip>${skip.h2}</skip>
             </configuration>
           </execution>
           <execution>
@@ -149,6 +158,7 @@
               <user>fyxture</user>
               <password>fyxture</password>
               <sqlMigrationSuffix>.oracle.sql</sqlMigrationSuffix>
+              <skip>${skip.oracle}</skip>
             </configuration>
           </execution>
           <execution>
@@ -165,6 +175,7 @@
               <user>sa</user>
               <password>s3nh@</password>
               <sqlMigrationSuffix>.sqlserver.sql</sqlMigrationSuffix>
+              <skip>${skip.sqlserver}</skip>
             </configuration>
           </execution>
         </executions>
@@ -173,6 +184,13 @@
   </build>
 
   <profiles>
+    <profile>
+      <id>skip</id>
+      <properties>
+        <skip.oracle>true</skip.oracle>
+        <skip.sqlserver>true</skip.sqlserver>
+      </properties>
+    </profile>
     <profile>
       <id>all</id>
       <build>

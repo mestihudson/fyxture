@@ -8,7 +8,7 @@ common:
     # identificador das instâncias padrão das tabelas
     default: default
     # ordem em que as tabelas devem sofrer 'delete' durante clear()
-    clear: 
+    clear: [livro, autor]
 
 # lista de datasources que podem ser utilizados em init(...)
 datasource:
@@ -31,12 +31,16 @@ datasource:
     user: sa
     password: s3nh@
 
-sequence:
-  -sq_id_livro
+sequence: [sq_id_livro]
 
 table:
   livro:
     sequence:
       #sq_id_livro: id
       name: sq_id_livro
+      column: id
+  autor:
+    sequence:
+      #sq_id_autor: id
+      name: sq_id_autor
       column: id

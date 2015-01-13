@@ -3,15 +3,14 @@ package com.fyxture;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.DriverManager;
 import java.sql.ResultSetMetaData;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +41,17 @@ public class Fyxture {
   public static void clear() throws Throwable {
     init();
     Map tables = m(get("config", "table"));
+    Collection table_names = list(get("config", "common.table.clear"));
+    if(table_names == null || table_names.isEmpty()){
+      table_names = tables.keySet();
+    }
     logger.debug(tables);
-    for(Object table : tables.keySet()) {
+    logger.debug(table_names);
+    for(Object table : table_names) {
       dialect.delete(s(table));
-      dialect.reset_sequence(s(table));
+      if(tables.containsKey(table)){
+    	dialect.reset_sequence(s(table));
+      }
     }
   }
 
@@ -216,7 +222,7 @@ public class Fyxture {
     return instance;
   }
 
-  private static Object load(String filename) throws Throwable {
+  private static Object cargo(String filename) throws Throwable {
     if(map.get(filename) == null) {
       String filepath = Fyxture.class.getClassLoader().getResource(filename.concat(".yml")).getPath();
       logger.debug(filepath);
@@ -228,16 +234,16 @@ public class Fyxture {
   }
 
   private static Object get(String filename, String... path) throws Throwable {
-    Object o = load(filename);
-    if(path.length == 0){
-      return o;
-    }else{
-      return path.length > 1 ? seg(o, path) : ges(o, path[0]);
+    Object o = cargo(filename);
+    if(path.length != 0){
+      o = path.length > 1 ? seg(o, path) : ges(o, path[0]);
     }
+    return o;
   }
 
   private static Object ges(Object o, String path) {
-	  return seg(o, path.split("\\."));
+	  Object result = seg(o, path.split("\\."));
+	  return result;
   }
 
   private static Object seg(Object o, String... p) {
