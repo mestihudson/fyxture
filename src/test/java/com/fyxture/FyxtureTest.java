@@ -182,6 +182,13 @@ public abstract class FyxtureTest {
     assert_have(3, "autor_livro");
   }
 
+  @Test public void verify() throws Throwable {
+    logger.debug("");
+    Fyxture.clear();
+    Fyxture.load("inicial");
+    Fyxture.verify("todos");
+  }
+
   protected void create(Integer id, Integer version, Integer ano, String titulo) throws Throwable {
     logger.debug(fmt("%d %d %d %s", id, version, ano, titulo));
     statement.execute(fmt("INSERT INTO LIVRO (ID, VERSION, ANO, TITULO) VALUES (%d, %d, %d, '%s')", id, version, ano, titulo));

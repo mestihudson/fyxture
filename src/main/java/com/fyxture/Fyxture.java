@@ -202,6 +202,45 @@ public class Fyxture {
     return init(ds);
   }
 
+  public static Fyxture verify(String name) throws Throwable {
+    init();
+    logger.info(name);
+    Object excludes = get("config", "common.verify.excludes");
+    Object o = get("config", fmt("verify.%s", name));
+    for(Object p : m(o).keySet()){
+      Object v = m(o).get(p);
+      String sp = s(p);
+
+      String pattern = "count~(";
+      Integer index = sp.indexOf(pattern);
+      if(index > -1){
+        List<String> c = new ArrayList<String>();
+        ResultSet rs = connection.getMetaData().getTables(null, null, "%", new String[] {"TABLE"});
+        while(rs.next()){
+          c.add(rs.getString(3));
+        }
+        sp = sp.substring(pattern.length() - 1, sp.length() - 1);
+        String [] tables = sp.split(",");
+        for(String t : tables) {
+          if(!c.contains(t)){
+            assert count(t.trim()) == i(v);
+          }
+        }
+      }
+
+      pattern = "count(";
+      index = sp.indexOf(pattern);
+      if(index > -1){
+        sp = sp.substring(pattern.length() - 1, sp.length() - 1);
+        String [] tables = sp.split(",");
+        for(String t : tables) {
+          assert count(t.trim()) == i(v);
+        }
+      }
+    }
+    return instance;
+  }
+
   public static Fyxture load(String name) throws Throwable {
     init();
     logger.info(name);

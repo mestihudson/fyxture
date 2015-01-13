@@ -9,6 +9,8 @@ common:
     default: default
     # ordem em que as tabelas devem sofrer 'delete' durante clear()
     clear: [livro, autor]
+  verify:
+    excludes: [schema_version]
 
 # lista de datasources que podem ser utilizados em init(...)
 datasource:
@@ -44,12 +46,12 @@ sequence: [sq_id_livro]
 table:
   livro:
     sequence:
-      #sq_id_livro: id
+      # sq_id_livro: id
       name: sq_id_livro
       column: id
   autor:
     sequence:
-      #sq_id_autor: id
+      # sq_id_autor: id
       name: sq_id_autor
       column: id
 
@@ -59,3 +61,10 @@ load:
     autor: [default, segundo-autor, terceiro]
     livro: [festa-no-ceu]
     autor_livro: [default, segundo-autor, terceiro]
+
+verify:
+  todos:
+    # verifica se todas as tabelas informadas como parametro do count tem resultado igual ao informado
+    count(autor, livro): 1
+    # verifica se todas as tabelas não informadas como parametro do count tem resultado igual ao informado
+    count(autor, livro): 0
