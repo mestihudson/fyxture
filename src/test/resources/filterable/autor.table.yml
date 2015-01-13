@@ -1,0 +1,11 @@
+default:
+  version: 0
+  nome: Machado de Assis
+
+segundo-autor:
+  version: 0
+  nome: Segundo
+
+terceiro:
+  version: 0
+  nome: Terceiro

@@ -165,6 +165,23 @@ public abstract class FyxtureTest {
     Assert.assertEquals(2, l.size());
   }
 
+  @Test public void load() throws Throwable {
+    logger.debug("");
+    Fyxture.clear();
+    Fyxture.load("inicial");
+    assert_have(1, "livro");
+    assert_have(1, "autor");
+  }
+
+  @Test public void load_object() throws Throwable {
+    logger.debug("");
+    Fyxture.clear();
+    Fyxture.load("outra-carga");
+    assert_have(1, "livro");
+    assert_have(3, "autor");
+    assert_have(3, "autor_livro");
+  }
+
   protected void create(Integer id, Integer version, Integer ano, String titulo) throws Throwable {
     logger.debug(fmt("%d %d %d %s", id, version, ano, titulo));
     statement.execute(fmt("INSERT INTO LIVRO (ID, VERSION, ANO, TITULO) VALUES (%d, %d, %d, '%s')", id, version, ano, titulo));
@@ -183,6 +200,13 @@ public abstract class FyxtureTest {
   private void assert_cleaned() throws Throwable {
     logger.debug("");
     Assert.assertThat(statement.executeQuery("SELECT * FROM LIVRO").next(), Matchers.equalTo(false));
+  }
+
+  private void assert_have(Integer quantity, String table) throws Throwable {
+    logger.debug("");
+    ResultSet rs = statement.executeQuery(fmt("SELECT COUNT(*) FROM %s", table));
+    rs.next();
+    Assert.assertThat(rs.getInt(1), Matchers.equalTo(quantity));
   }
 
   private void assert_have() throws Throwable {

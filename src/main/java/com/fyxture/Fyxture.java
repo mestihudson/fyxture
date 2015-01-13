@@ -202,14 +202,26 @@ public class Fyxture {
     return init(ds);
   }
 
-  private static Fyxture getInstance() throws Throwable {
-    return new Fyxture(
-      s(get("config", fmt("datasource.%s.driver", datasource))),
-      s(get("config", fmt("datasource.%s.url", datasource))),
-      s(get("config", fmt("datasource.%s.user", datasource))),
-      s(get("config", fmt("datasource.%s.password", datasource))),
-      s(get("config", fmt("datasource.%s.dialect", datasource)))
-    );
+  public static Fyxture load(String name) throws Throwable {
+    init();
+    logger.info(name);
+    Object o = get("config", fmt("load.%s", name));
+    if(o != null){
+      if(o instanceof List){
+        for(Object t : list(o)){
+          insert(s(t));
+        }
+      }
+      if(o instanceof Map){
+        for(Object t : m(o).keySet()){
+          Object v = m(o).get(t);
+          for(Object i : list(v)){
+            insert(s(t), s(i));
+          }
+        }
+      }
+    }
+    return instance;
   }
 
   public static Fyxture init(String datasourcename) throws Throwable {
@@ -220,6 +232,16 @@ public class Fyxture {
     }
     logger.info(instance);
     return instance;
+  }
+
+  private static Fyxture getInstance() throws Throwable {
+    return new Fyxture(
+      s(get("config", fmt("datasource.%s.driver", datasource))),
+      s(get("config", fmt("datasource.%s.url", datasource))),
+      s(get("config", fmt("datasource.%s.user", datasource))),
+      s(get("config", fmt("datasource.%s.password", datasource))),
+      s(get("config", fmt("datasource.%s.dialect", datasource)))
+    );
   }
 
   private static Object cargo(String filename) throws Throwable {
