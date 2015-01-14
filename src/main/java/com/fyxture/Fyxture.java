@@ -207,6 +207,9 @@ public class Fyxture {
     init();
     logger.info(name);
     Object o = get("config", fmt("verify.%s", name));
+    if(o instanceof String) {
+      return verify(s(o));
+    }
     for(Object p : m(o).keySet()){
       Object v = m(o).get(p);
       String sp = s(p);
@@ -259,6 +262,9 @@ public class Fyxture {
     logger.info(name);
     Object o = get("config", fmt("load.%s", name));
     if(o != null){
+      if(o instanceof String){
+        return load(s(o));
+      }
       if(o instanceof List){
         for(Object t : list(o)){
           insert(s(t));
