@@ -35,7 +35,7 @@ public class Fyxture {
   private static String password;
   private static Dialect dialect;
 
-  private static final String COUNT = "SELECT COUNT(1) FROM %s";
+  private static final String COUNT = "SELECT COUNT(1) FROM [%s]";
   private static final String SELECT = "SELECT %s FROM %s WHERE %s";
   private static final String NL = "\n";
 
@@ -206,7 +206,6 @@ public class Fyxture {
   public static Fyxture verify(String name) throws Throwable {
     init();
     logger.info(name);
-    List excludes = list(get("config", "common.verify.excludes"));
     Object o = get("config", fmt("verify.%s", name));
     for(Object p : m(o).keySet()){
       Object v = m(o).get(p);
@@ -215,12 +214,15 @@ public class Fyxture {
       String pattern = "count~(";
       Integer index = sp.indexOf(pattern);
       if(index > -1){
-        List<String> c = dbtables();
+        List c = dbtables();
         sp = sp.substring(pattern.length(), sp.length() - 1);
-        List<String> tables = splitrim(sp, ",");
-        for(String t : c) {
-          if(!tables.contains(t.toLowerCase()) && !excludes.contains(t)){
-            assert count(t.trim()) == i(v);
+        List tables = splitrim(sp, ",");
+        for(Object t : c) {
+          if(!tables.contains(t)){
+        	int count = count(s(t).trim());
+            if(count != i(v)){
+              throw new FyxtureVerifyFail(fmt("Table count for %s excepted <%d> but was <%d>", s(t), i(v), count));
+            }
           }
         }
       }
@@ -229,23 +231,28 @@ public class Fyxture {
       index = sp.indexOf(pattern);
       if(index > -1){
         sp = sp.substring(pattern.length(), sp.length() - 1);
-        List<String> tables = splitrim(sp, ",");
-        for(String t : tables) {
-          assert count(t.trim()) == i(v);
+        List tables = splitrim(sp, ",");
+        for(Object t : tables) {
+          assert count(s(t).trim()) == i(v);
         }
       }
     }
     return instance;
   }
 
-private static List<String> dbtables() throws SQLException {
+  private static List<String> dbtables() throws Throwable {
+	List excludes = list(get("config", "common.verify.excludes"));
+	String schema = s(get("config", fmt("common.datasource.%s.schema", datasource)));
 	List<String> c = new ArrayList<String>();
-	ResultSet rs = connection.getMetaData().getTables(null, null, "%", new String[] {"TABLE"});
+	ResultSet rs = connection.getMetaData().getTables(null, schema, "%", new String[] {"TABLE"});
 	while(rs.next()){
-	  c.add(rs.getString(3));
+	  String table = rs.getString(3);
+	  if(!excludes.contains(table)){
+		c.add(table);
+	  }
 	}
 	return c;
-}
+  }
 
   private static List<String> splitrim(String value, String pattern) {
 	String [] parts = value.split(pattern);
