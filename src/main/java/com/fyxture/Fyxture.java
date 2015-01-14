@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.DriverManager;
@@ -205,7 +206,7 @@ public class Fyxture {
   public static Fyxture verify(String name) throws Throwable {
     init();
     logger.info(name);
-    Object excludes = get("config", "common.verify.excludes");
+    List excludes = list(get("config", "common.verify.excludes"));
     Object o = get("config", fmt("verify.%s", name));
     for(Object p : m(o).keySet()){
       Object v = m(o).get(p);
@@ -214,15 +215,11 @@ public class Fyxture {
       String pattern = "count~(";
       Integer index = sp.indexOf(pattern);
       if(index > -1){
-        List<String> c = new ArrayList<String>();
-        ResultSet rs = connection.getMetaData().getTables(null, null, "%", new String[] {"TABLE"});
-        while(rs.next()){
-          c.add(rs.getString(3));
-        }
-        sp = sp.substring(pattern.length() - 1, sp.length() - 1);
-        String [] tables = sp.split(",");
-        for(String t : tables) {
-          if(!c.contains(t)){
+        List<String> c = dbtables();
+        sp = sp.substring(pattern.length(), sp.length() - 1);
+        List<String> tables = splitrim(sp, ",");
+        for(String t : c) {
+          if(!tables.contains(t.toLowerCase()) && !excludes.contains(t)){
             assert count(t.trim()) == i(v);
           }
         }
@@ -231,8 +228,8 @@ public class Fyxture {
       pattern = "count(";
       index = sp.indexOf(pattern);
       if(index > -1){
-        sp = sp.substring(pattern.length() - 1, sp.length() - 1);
-        String [] tables = sp.split(",");
+        sp = sp.substring(pattern.length(), sp.length() - 1);
+        List<String> tables = splitrim(sp, ",");
         for(String t : tables) {
           assert count(t.trim()) == i(v);
         }
@@ -241,7 +238,25 @@ public class Fyxture {
     return instance;
   }
 
-  public static Fyxture load(String name) throws Throwable {
+private static List<String> dbtables() throws SQLException {
+	List<String> c = new ArrayList<String>();
+	ResultSet rs = connection.getMetaData().getTables(null, null, "%", new String[] {"TABLE"});
+	while(rs.next()){
+	  c.add(rs.getString(3));
+	}
+	return c;
+}
+
+  private static List<String> splitrim(String value, String pattern) {
+	String [] parts = value.split(pattern);
+	List<String> result = new ArrayList<String>();
+	for (String part : parts) {
+		result.add(part.trim());
+	}
+	return result;
+}
+
+public static Fyxture load(String name) throws Throwable {
     init();
     logger.info(name);
     Object o = get("config", fmt("load.%s", name));

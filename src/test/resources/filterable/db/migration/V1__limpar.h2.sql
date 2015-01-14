@@ -1,2 +1,2 @@
-DELETE FROM LIVRO;
-ALTER SEQUENCE SQ_ID_LIVRO RESTART WITH 1;
+delete from livro;
+alter sequence sq_id_livro restart with 1;

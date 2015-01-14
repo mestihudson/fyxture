@@ -41,7 +41,7 @@ datasource:
     # use '$' para não tratar o elemento seguinte como string, ou seja, não quotar a expressão
     # password: $newid()
 
-sequence: [sq_id_livro]
+sequence: [sq_id_livro, sq_id_autor]
 
 table:
   livro:
@@ -67,4 +67,4 @@ verify:
     # verifica se todas as tabelas informadas como parametro do count tem resultado igual ao informado
     count(autor, livro): 1
     # verifica se todas as tabelas não informadas como parametro do count tem resultado igual ao informado
-    count(autor, livro): 0
+    count~(autor, livro): 0
