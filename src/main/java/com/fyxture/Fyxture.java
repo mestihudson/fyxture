@@ -241,29 +241,20 @@ public class Fyxture {
   }
 
   private static List<String> dbtables() throws Throwable {
-	List excludes = list(get("config", "common.verify.excludes"));
-	String schema = s(get("config", fmt("common.datasource.%s.schema", datasource)));
-	List<String> c = new ArrayList<String>();
-	ResultSet rs = connection.getMetaData().getTables(null, schema, "%", new String[] {"TABLE"});
-	while(rs.next()){
-	  String table = rs.getString(3);
-	  if(!excludes.contains(table)){
-		c.add(table);
-	  }
-	}
-	return c;
+  	List excludes = list(get("config", "common.verify.excludes"));
+  	String schema = s(get("config", fmt("common.datasource.%s.schema", datasource)));
+  	List<String> c = new ArrayList<String>();
+  	ResultSet rs = connection.getMetaData().getTables(null, schema, "%", new String[] {"TABLE"});
+  	while(rs.next()){
+  	  String table = rs.getString(3);
+  	  if(!excludes.contains(table)){
+  		c.add(table);
+  	  }
+  	}
+  	return c;
   }
 
-  private static List<String> splitrim(String value, String pattern) {
-	String [] parts = value.split(pattern);
-	List<String> result = new ArrayList<String>();
-	for (String part : parts) {
-		result.add(part.trim());
-	}
-	return result;
-}
-
-public static Fyxture load(String name) throws Throwable {
+  public static Fyxture load(String name) throws Throwable {
     init();
     logger.info(name);
     Object o = get("config", fmt("load.%s", name));
@@ -305,17 +296,6 @@ public static Fyxture load(String name) throws Throwable {
     );
   }
 
-  private static Object cargo(String filename) throws Throwable {
-    if(map.get(filename) == null) {
-      String filepath = Fyxture.class.getClassLoader().getResource(filename.concat(".yml")).getPath();
-      logger.debug(filepath);
-      InputStream input = new FileInputStream(new File(filepath));
-      Yaml yaml = new Yaml();
-      map.put(filename, yaml.load(input));
-    }
-    return map.get(filename);
-  }
-
   private static Object get(String filename, String... path) throws Throwable {
     Object o = cargo(filename);
     if(path.length != 0){
@@ -325,8 +305,8 @@ public static Fyxture load(String name) throws Throwable {
   }
 
   private static Object ges(Object o, String path) {
-	  Object result = seg(o, path.split("\\."));
-	  return result;
+    Object result = seg(o, path.split("\\."));
+    return result;
   }
 
   private static Object seg(Object o, String... p) {
@@ -343,8 +323,19 @@ public static Fyxture load(String name) throws Throwable {
     n.remove(position);
     String [] re = new String[n.size()];
     for(String e : n){
-    	re[n.indexOf(e)] = e;
+      re[n.indexOf(e)] = e;
     }
     return re;
+  }
+
+  private static Object cargo(String filename) throws Throwable {
+    if(map.get(filename) == null) {
+      String filepath = Utils.class.getClassLoader().getResource(filename.concat(".yml")).getPath();
+      logger.debug(filepath);
+      InputStream input = new FileInputStream(new File(filepath));
+      Yaml yaml = new Yaml();
+      map.put(filename, yaml.load(input));
+    }
+    return map.get(filename);
   }
 }
