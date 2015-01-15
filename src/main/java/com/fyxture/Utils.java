@@ -38,7 +38,9 @@ public class Utils {
   public static String fmt(String value, Object... args) {
     logger.debug(value);
     logger.debug(args.length);
-    return String.format(value, args);
+    String result = String.format(value, args);
+    logger.debug(result);
+    return result;
   }
 
   public static String cat(String initial, String... parts) {
@@ -53,18 +55,24 @@ public class Utils {
   }
 
   public static String literal(Object value) {
+    String result;
   	String svalue = s(value);
-  	String [] all = svalue.split("'");
-  	svalue = all.length > 1 ? (StringUtils.join(all, "''") + (svalue.charAt(svalue.length() - 1) == '\'' ? "''" : "")) : svalue;
-  	String result = "'" + svalue + "'";
-  	switch(svalue.charAt(0)){
-  	  case '$':
-  		result = svalue.substring(1);
-  		break;
-  	  case '\\':
-  		result = "'" + svalue.substring(1) + "'";
-  		break;
-  	}
+    logger.debug(svalue);
+    if(svalue.length() != 0){
+      switch(svalue.charAt(0)){
+        case '$':
+          result = svalue.substring(1);
+          break;
+        case '\\':
+          svalue = svalue.substring(1);
+        default:
+          String [] all = svalue.split("'");
+          svalue = all.length > 1 ? (StringUtils.join(all, "''") + (svalue.charAt(svalue.length() - 1) == '\'' ? "''" : "")) : svalue;
+          result = "'" + svalue + "'";
+      }
+    }else{
+      result = "''";
+    }
   	return result;
   }
 

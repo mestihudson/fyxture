@@ -57,7 +57,7 @@ public class Fyxture {
   }
 
   void execute(String command) throws Throwable {
-    logger.info(command);
+    logger.debug(command);
     statement.execute(command);
   }
 
@@ -181,7 +181,7 @@ public class Fyxture {
   }
 
   private void setDialect(String dialectDescriptor) {
-    logger.info(dialectDescriptor);
+    logger.debug(dialectDescriptor);
     if(dialectDescriptor.equals("h2")){
       dialect = new H2Dialect(this);
       return;
@@ -199,13 +199,13 @@ public class Fyxture {
 
   public static Fyxture init() throws Throwable {
     String ds = datasource == null ? s(get("config","common.datasource.default")) : datasource;
-    logger.info(ds);
+    logger.debug(ds);
     return init(ds);
   }
 
   public static Fyxture verify(String name) throws Throwable {
     init();
-    logger.info(name);
+    logger.debug(name);
     Object o = get("config", fmt("verify.%s", name));
     if(o instanceof String) {
       return verify(s(o));
@@ -259,7 +259,7 @@ public class Fyxture {
 
   public static Fyxture load(String name) throws Throwable {
     init();
-    logger.info(name);
+    logger.debug(name);
     Object o = get("config", fmt("load.%s", name));
     if(o != null){
       if(o instanceof String){
@@ -283,12 +283,12 @@ public class Fyxture {
   }
 
   public static Fyxture init(String datasourcename) throws Throwable {
-    logger.info(datasourcename);
+    logger.debug(datasourcename);
     if(!datasourcename.equals(datasource)){
       datasource = datasourcename;
       instance = getInstance();
     }
-    logger.info(instance);
+    logger.debug(instance);
     return instance;
   }
 

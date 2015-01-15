@@ -14,13 +14,13 @@ abstract class Dialect {
   Fyxture fyxture;
 
   Dialect(Fyxture fyxture) {
-    logger.info(fyxture);
+    logger.debug(fyxture);
     this.fyxture = fyxture;
   }
 
   void delete(String table) throws Throwable {
-    logger.info(fyxture);
-    logger.info(table);
+    logger.debug(fyxture);
+    logger.debug(table);
     fyxture.execute(fmt(DELETE, table));
   }
 
@@ -29,11 +29,13 @@ abstract class Dialect {
     String vals = "";
     for(String column : columns){
       Object value = values.get(columns.indexOf(column));
+      logger.debug(column);
+      logger.debug(value);
       cols = cat(cols, comma(cols) + column);
       vals = cat(vals, comma(vals) + quote(value));
     }
     String command = fmt(INSERT, table, cols, vals);
-    logger.info(command);
+    logger.debug(command);
     fyxture.execute(command);
   }
 

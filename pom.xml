@@ -182,6 +182,12 @@
 
   <profiles>
     <profile>
+      <id>notest</id>
+      <properties>
+        <maven.test.skip>true</maven.test.skip>
+      </properties>
+    </profile>
+    <profile>
       <id>noskip</id>
       <properties>
         <skip.oracle>false</skip.oracle>
