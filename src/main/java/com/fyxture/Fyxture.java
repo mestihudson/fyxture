@@ -267,7 +267,25 @@ public class Fyxture {
       }
       if(o instanceof List){
         for(Object t : list(o)){
-          insert(s(t));
+          if(t instanceof Map) {
+            for(Object k : m(t).keySet()){
+              Object v = m(t).get(k);
+              if(v instanceof String) {
+                insert(s(k), s(v));
+              }
+              if(v instanceof List) {
+                for(Object e : list(v)) {
+                  insert(s(k), s(e));
+                }
+              }
+            }
+          }
+          if(t instanceof String) {
+            insert(s(t));
+          }
+          logger.info(t != null ? t.getClass() : null);
+          logger.info(t != null ? t : null);
+          
         }
       }
       if(o instanceof Map){
