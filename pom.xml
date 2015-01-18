@@ -225,7 +225,7 @@
         <executions>
           <execution>
             <id>h2</id>
-            <phase>validate</phase>
+            <phase>pre-integration-test</phase>
             <goals>
               <goal>clean</goal>
               <goal>migrate</goal>
@@ -241,7 +241,7 @@
           </execution>
           <execution>
             <id>oracle</id>
-            <phase>validate</phase>
+            <phase>pre-integration-test</phase>
             <goals>
               <goal>clean</goal>
               <goal>migrate</goal>
@@ -258,7 +258,7 @@
           </execution>
           <execution>
             <id>sqlserver</id>
-            <phase>validate</phase>
+            <phase>pre-integration-test</phase>
             <goals>
               <goal>clean</goal>
               <goal>migrate</goal>

@@ -76,7 +76,7 @@ public class Utils {
   	return result;
   }
 
-  public static String comma(String value) throws Throwable {
+  public static String comma(String value) {
     return value == null || value.equals("") ? "" : ", ";
   }
 
