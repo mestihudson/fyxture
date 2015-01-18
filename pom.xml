@@ -54,7 +54,7 @@
       <artifactId>ojdbc6</artifactId>
       <version>11.2.0.3</version>
       <scope>system</scope>
-      <systemPath>${basedir}/src/test/resources/unfilterable/ojdbc6-11.2.0.3.jar</systemPath>
+      <systemPath>${basedir}/src/test/common/resources/unfilterable/ojdbc6-11.2.0.3.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.jtds</groupId>
@@ -88,18 +88,116 @@
         <version>1.9</version>
         <executions>
           <execution>
-            <id>add-test-resources</id>
+            <id>add-unit-test-sources</id>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/test/unit/java</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-unit-test-resources</id>
             <goals>
               <goal>add-test-resource</goal>
             </goals>
             <configuration>
               <resources>
                 <resource>
-                  <directory>src/test/resources/filterable</directory>
+                  <directory>src/test/unit/resources/filterable</directory>
                   <filtering>true</filtering>
                 </resource>
                 <resource>
-                  <directory>src/test/resources/unfilterable</directory>
+                  <directory>src/test/unit/resources/unfilterable</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-common-test-sources</id>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/test/common/java</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-common-test-resources</id>
+            <goals>
+              <goal>add-test-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>src/test/common/resources/filterable</directory>
+                  <filtering>true</filtering>
+                </resource>
+                <resource>
+                  <directory>src/test/common/resources/unfilterable</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-integration-test-sources</id>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/test/integration/java</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-integration-test-resources</id>
+            <goals>
+              <goal>add-test-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>src/test/integration/resources/filterable</directory>
+                  <filtering>true</filtering>
+                </resource>
+                <resource>
+                  <directory>src/test/integration/resources/unfilterable</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-e2e-test-sources</id>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/test/e2e/java</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-e2e-test-resources</id>
+            <goals>
+              <goal>add-test-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>src/test/e2e/resources/filterable</directory>
+                  <filtering>true</filtering>
+                </resource>
+                <resource>
+                  <directory>src/test/e2e/resources/unfilterable</directory>
                   <filtering>false</filtering>
                 </resource>
               </resources>
@@ -121,7 +219,7 @@
         <version>3.1</version>
         <configuration>
           <locations>
-            <location>filesystem:${basedir}/src/test/resources/filterable/db/migration</location>
+            <location>filesystem:${basedir}/src/test/common/resources/filterable/db/migration</location>
           </locations>
         </configuration>
         <executions>
