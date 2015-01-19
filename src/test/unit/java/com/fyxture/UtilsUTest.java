@@ -32,4 +32,19 @@ public class UtilsUTest {
     Assert.assertThat(Utils.literal("\\$newid()"), Matchers.equalTo("'$newid()'"));
     Assert.assertThat(Utils.literal("'$newid()'"), Matchers.equalTo("'''$newid()'''"));
   }
+
+  @Test
+  public void splitrim() {
+    Assert.assertThat(Utils.fmt("%s %d", "a", new Integer(1)), Matchers.equalTo("a 1"));
+  }
+
+  @Test
+  public void fmt() {
+    Assert.assertThat(Utils.fmt("%s %d", "a", new Integer(1)), Matchers.equalTo("a 1"));
+  }
+
+  @Test
+  public void cat() {
+    Assert.assertThat(Utils.cat("a", "b", "c"), Matchers.equalTo("abc"));
+  }
 }
