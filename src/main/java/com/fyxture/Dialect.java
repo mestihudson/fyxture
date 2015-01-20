@@ -25,6 +25,12 @@ abstract class Dialect {
   }
 
   void insert(String table, List<String> columns, List<Object> values) throws Throwable {
+    String command = insert_command(table, columns, values);
+    logger.debug(command);
+    fyxture.execute(command);
+  }
+
+  String insert_command(String table, List<String> columns, List<Object> values) throws Throwable {
     String cols = "";
     String vals = "";
     for(String column : columns){
@@ -34,9 +40,7 @@ abstract class Dialect {
       cols = cat(cols, comma(cols) + column);
       vals = cat(vals, comma(vals) + quote(value));
     }
-    String command = fmt(INSERT, table, cols, vals);
-    logger.debug(command);
-    fyxture.execute(command);
+    return fmt(INSERT, table, cols, vals);
   }
 
   abstract void reset_sequence(String table) throws Throwable;

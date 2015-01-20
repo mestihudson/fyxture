@@ -12,6 +12,9 @@
     <skip.h2>false</skip.h2>
     <skip.oracle>true</skip.oracle>
     <skip.sqlserver>true</skip.sqlserver>
+    <maven.test.unit.skip>false</maven.test.unit.skip>
+    <maven.test.integration.skip>false</maven.test.integration.skip>
+    <maven.test.e2e.skip>false</maven.test.e2e.skip>
   </properties>
 
   <dependencies>
@@ -275,14 +278,88 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.17</version>
+        <configuration>
+          <skipTests>${maven.test.unit.skip}</skipTests>
+          <includes>
+            <include>**/*UTest.java</include>
+          </includes>
+          <excludes>
+            <exclude>**/*ITest.java</exclude>
+            <exclude>**/*ETest.java</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-tests</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <skipTests>${maven.test.integration.skip}</skipTests>
+              <includes>
+                <include>**/*ITest.java</include>
+              </includes>
+              <excludes>
+                <exclude>**/*UTest.java</exclude>
+                <exclude>**/*ETest.java</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>e2e-tests</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <skipTests>${maven.test.e2e.skip}</skipTests>
+              <testFailureIgnore>true</testFailureIgnore>
+              <excludes>
+                <exclude>**/*UTest.java</exclude>
+                <exclude>**/*ITest.java</exclude>
+              </excludes>
+              <includes>
+                <include>**/*ETest.java</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
   <profiles>
     <profile>
-      <id>notest</id>
+      <id>n</id>
       <properties>
-        <maven.test.skip>true</maven.test.skip>
+        <maven.test.unit.skip>true</maven.test.unit.skip>
+        <maven.test.integration.skip>true</maven.test.integration.skip>
+        <maven.test.e2e.skip>true</maven.test.e2e.skip>
+      </properties>
+    </profile>
+    <profile>
+      <id>u</id>
+      <properties>
+        <maven.test.integration.skip>true</maven.test.integration.skip>
+        <maven.test.e2e.skip>true</maven.test.e2e.skip>
+      </properties>
+    </profile>
+    <profile>
+      <id>i</id>
+      <properties>
+        <maven.test.unit.skip>true</maven.test.unit.skip>
+        <maven.test.e2e.skip>true</maven.test.e2e.skip>
+      </properties>
+    </profile>
+    <profile>
+      <id>e</id>
+      <properties>
+        <maven.test.unit.skip>true</maven.test.unit.skip>
+        <maven.test.integration.skip>true</maven.test.integration.skip>
       </properties>
     </profile>
     <profile>

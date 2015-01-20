@@ -178,6 +178,23 @@ public class Fyxture {
     Class.forName(this.driver = driver).newInstance();
     this.statement = (this.connection = DriverManager.getConnection(this.url = url, this.user = user, this.password = password)).createStatement();
     setDialect(dialect);
+    String suffix = s(get("config", "common.table.suffix"));
+    String auto = s(get("config", "common.table.auto"));
+    logger.info(suffix);
+    logger.info(dbtables());
+    if(auto != null){
+      for(String t : dbtables()){
+        File f =  new File(cat(auto, "/", t, ".", suffix, ".yml"));
+        logger.info(f.exists());
+      }
+    }
+    // for(String t : dbtables()){
+    //   // try{
+    //   //   String filepath = Utils.class.getClassLoader().getResource(filename.concat(".yml")).getPath();
+    //   // }catch(Throwable t) {
+
+    //   // }
+    // }
   }
 
   private void setDialect(String dialectDescriptor) {
@@ -203,6 +220,16 @@ public class Fyxture {
     return init(ds);
   }
 
+  public static Fyxture init(String datasourcename) throws Throwable {
+    logger.debug(datasourcename);
+    if(!datasourcename.equals(datasource)){
+      datasource = datasourcename;
+      instance = getInstance();
+    }
+    logger.debug(instance);
+    return instance;
+  }
+
   public static Fyxture verify(String name) throws Throwable {
     init();
     logger.debug(name);
@@ -222,7 +249,7 @@ public class Fyxture {
         List tables = splitrim(sp, ",");
         for(Object t : c) {
           if(!tables.contains(t)){
-        	int count = count(s(t).trim());
+          int count = count(s(t).trim());
             if(count != i(v)){
               throw new FyxtureVerifyFail(fmt("Table count for %s excepted <%d> but was <%d>", s(t), i(v), count));
             }
@@ -243,18 +270,29 @@ public class Fyxture {
     return instance;
   }
 
+  private static List<String> alldbtables() throws Throwable {
+    List excludes = list(get("config", "common.verify.excludes"));
+    String schema = s(get("config", fmt("datasource.%s.schema", datasource)));
+    List<String> c = new ArrayList<String>();
+    ResultSet rs = connection.getMetaData().getTables(null, schema, "%", new String[] {"TABLE"});
+    while(rs.next()){
+      c.add(rs.getString(3));
+    }
+    return c;
+  }
+
   private static List<String> dbtables() throws Throwable {
-  	List excludes = list(get("config", "common.verify.excludes"));
-  	String schema = s(get("config", fmt("common.datasource.%s.schema", datasource)));
-  	List<String> c = new ArrayList<String>();
-  	ResultSet rs = connection.getMetaData().getTables(null, schema, "%", new String[] {"TABLE"});
-  	while(rs.next()){
-  	  String table = rs.getString(3);
-  	  if(!excludes.contains(table)){
-  		c.add(table);
-  	  }
-  	}
-  	return c;
+    List excludes = list(get("config", "common.verify.excludes"));
+    String schema = s(get("config", fmt("datasource.%s.schema", datasource)));
+    List<String> c = new ArrayList<String>();
+    ResultSet rs = connection.getMetaData().getTables(null, schema, "%", new String[] {"TABLE"});
+    while(rs.next()){
+      String table = rs.getString(3);
+      if(!excludes.contains(table)){
+      c.add(table);
+      }
+    }
+    return c;
   }
 
   public static Fyxture load(String name) throws Throwable {
@@ -300,15 +338,6 @@ public class Fyxture {
     return instance;
   }
 
-  public static Fyxture init(String datasourcename) throws Throwable {
-    logger.debug(datasourcename);
-    if(!datasourcename.equals(datasource)){
-      datasource = datasourcename;
-      instance = getInstance();
-    }
-    logger.debug(instance);
-    return instance;
-  }
 
   private static Fyxture getInstance() throws Throwable {
     return new Fyxture(

@@ -3,6 +3,9 @@ common:
   # nome do padrão
   datasource: h2
   table:
+    # informa onde os arquivos de fyxtures devem ser gerados
+    # default: null
+    auto: src/test/common/resources/filterable
     # sufixo dos arquivos .yml que contem as instancias das tabelas
     suffix: table
     # identificador das instâncias padrão das tabelas
@@ -16,6 +19,7 @@ common:
 datasource:
   h2:
     dialect: h2
+    schema: PUBLIC
     driver: org.h2.Driver
     url: jdbc:h2:target/fyxture
     user: sa
