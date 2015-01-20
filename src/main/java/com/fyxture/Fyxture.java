@@ -178,6 +178,10 @@ public class Fyxture {
     Class.forName(this.driver = driver).newInstance();
     this.statement = (this.connection = DriverManager.getConnection(this.url = url, this.user = user, this.password = password)).createStatement();
     setDialect(dialect);
+    auto();
+  }
+
+  private void auto() throws Throwable {
     String suffix = s(get("config", "common.table.suffix"));
     String auto = s(get("config", "common.table.auto"));
     logger.info(suffix);
