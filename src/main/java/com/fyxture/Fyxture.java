@@ -177,41 +177,49 @@ public class Fyxture {
   private Fyxture(String driver, String url, String user, String password, String dialect) throws Throwable {
     Class.forName(this.driver = driver).newInstance();
     this.statement = (this.connection = DriverManager.getConnection(this.url = url, this.user = user, this.password = password)).createStatement();
-    setDialect(dialect);
+    dialect(dialect);
     auto();
   }
 
   private void auto() throws Throwable {
-    String suffix = s(get("config", "common.table.suffix"));
     String auto = s(get("config", "common.table.auto"));
-    logger.info(suffix);
-    logger.info(dbtables());
+    logger.debug(dbtables());
     if(auto != null){
-      for(String t : dbtables()){
-        File f =  new File(cat(auto, "/", t, ".", suffix, ".yml"));
-        logger.info(f.exists());
+      String suffix = s(get("config", "common.table.suffix"));
+      logger.debug(suffix);
+      for(String table : dbtables()){
+        String filename = cat(datasource, "/", table, ".", suffix, ".yml");
+        logger.debug(filename);
+        try{
+          Utils.class.getClassLoader().getResource(filename).getPath();
+          logger.debug("   existe");
+        }catch(Throwable t) {
+          logger.debug("   não existe");
+          File file = new File(cat(auto, "/", filename));
+          logger.debug(file.getAbsolutePath());
+          if(!file.exists()){
+            if(!file.getParentFile().exists()){
+              file.getParentFile().mkdirs();
+            }
+            file.createNewFile();
+            logger.info(attributies(table));
+          }
+        }
       }
     }
-    // for(String t : dbtables()){
-    //   // try{
-    //   //   String filepath = Utils.class.getClassLoader().getResource(filename.concat(".yml")).getPath();
-    //   // }catch(Throwable t) {
-
-    //   // }
-    // }
   }
 
-  private void setDialect(String dialectDescriptor) {
-    logger.debug(dialectDescriptor);
-    if(dialectDescriptor.equals("h2")){
+  private void dialect(String descriptor) {
+    logger.debug(descriptor);
+    if(descriptor.equals("h2")){
       dialect = new H2Dialect(this);
       return;
     }
-    if(dialectDescriptor.equals("oracle")){
+    if(descriptor.equals("oracle")){
       dialect = new OracleDialect(this);
       return;
     }
-    if(dialectDescriptor.equals("sqlserver")){
+    if(descriptor.equals("sqlserver")){
       dialect = new SQLServerDialect(this);
       return;
     }
@@ -285,15 +293,62 @@ public class Fyxture {
     return c;
   }
 
+  private static String attributies(final String table) throws Throwable {
+    
+    StringBuffer fullsb = new StringBuffer();
+    logger.info(table);
+
+    String min = s(get("config", "common.table.default"));
+    min = min == null ? "default" : min;
+    StringBuffer minsb = new StringBuffer();
+    minsb.append("#" + min + ":\n\t");
+
+    String full = s(get("config", "common.table.full"));
+    full = full == null ? "full" : full;
+    fullsb.append("#" + full + ": [");
+
+    String schema = s(get("config", fmt("datasource.%s.schema", datasource)));
+
+    ResultSet rs = connection.getMetaData().getColumns(null, schema, table, "%");
+    while(rs.next()){
+      ResultSetMetaData rsmd = rs.getMetaData();
+      if(rs.getString(11).equals("0")){
+        minsb.append(cat("#\t", rs.getString(4), ":  #", rs.getString(6), "(", rs.getString(7), rs.getString(9) == null ? "" : ",", rs.getString(9) == null ? "" : rs.getString(9), ")\n\t"));
+      }
+      if(!rs.getString(11).equals("0")){
+        fullsb.append(cat(comma(fullsb.toString(), "#" + full + ": ["), rs.getString(4), ":  #", rs.getString(6), "(", rs.getString(7), rs.getString(9) == null ? "" : ",", rs.getString(9) == null ? "" : rs.getString(9), ")"));
+      }
+      for(int i = 1; i < 25; i++){
+        String id = (new Integer(i)).toString();
+        String name = rsmd.getColumnName(i);
+        String value = rs.getString(i);
+        logger.info(cat("" , id, " - ", name, " : ", value));
+      }
+      // logger.info(rs.getString(4));//name
+      // logger.info(rs.getString(5));//type
+      // logger.info(rs.getString(6));//typename
+      // logger.info(rs.getString(7));//size
+      // logger.info(rs.getString(11));//nullable
+      // logger.info(rs.getString(23));//autoincrement
+    }
+    fullsb.append("]\n");
+    minsb.append("\n" + fullsb.toString());
+    return minsb.toString();
+  }
+
   private static List<String> dbtables() throws Throwable {
+    return dbtables("%");
+  }
+
+  private static List<String> dbtables(final String pattern) throws Throwable {
     List excludes = list(get("config", "common.verify.excludes"));
     String schema = s(get("config", fmt("datasource.%s.schema", datasource)));
     List<String> c = new ArrayList<String>();
-    ResultSet rs = connection.getMetaData().getTables(null, schema, "%", new String[] {"TABLE"});
+    ResultSet rs = connection.getMetaData().getTables(null, schema, pattern, new String[] {"TABLE"});
     while(rs.next()){
       String table = rs.getString(3);
       if(!excludes.contains(table)){
-      c.add(table);
+        c.add(table);
       }
     }
     return c;
