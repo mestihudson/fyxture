@@ -7,7 +7,6 @@
 ##nullable attributies
 
 default:
-  ID:
   VERSION: 0
   ANO: 1884
   TITULO: Dom Casmurro

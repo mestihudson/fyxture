@@ -12,6 +12,10 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="src/test/common/java"/>
+	<classpathentry kind="src" path="src/test/common/resources/filterable"/>
+	<classpathentry kind="src" path="src/test/unit/java"/>
+	<classpathentry kind="src" path="src/test/common/resources/unfilterable"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>

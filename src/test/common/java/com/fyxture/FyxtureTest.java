@@ -86,16 +86,16 @@ public abstract class FyxtureTest {
   @Test public void count() throws Throwable {
     logger.debug("");
     Fyxture.clear();
-    Assert.assertThat(Fyxture.count("livro"), Matchers.equalTo(0));
+    Assert.assertThat(Fyxture.count("LIVRO"), Matchers.equalTo(0));
     Fyxture.clear();
     create();
-    Assert.assertThat(Fyxture.count("livro"), Matchers.equalTo(1));
+    Assert.assertThat(Fyxture.count("LIVRO"), Matchers.equalTo(1));
   }
 
   @Test public void insert() throws Throwable {
     logger.debug("");
     Fyxture.clear();
-    Fyxture.insert("livro");
+    Fyxture.insert("LIVRO");
     assert_have();
     assert_current_value_of_sequence_is(1);
   }
@@ -103,7 +103,7 @@ public abstract class FyxtureTest {
   @Test public void named_insert() throws Throwable {
     logger.debug("");
     Fyxture.clear();
-    Fyxture.insert("livro", "festa-no-ceu");
+    Fyxture.insert("LIVRO", "festa-no-ceu");
     assert_have();
     assert_current_value_of_sequence_is(2);
   }
@@ -111,7 +111,7 @@ public abstract class FyxtureTest {
   @Test public void insert_with_replacement() throws Throwable {
     logger.debug("");
     Fyxture.clear();
-    Fyxture.insert("livro", pair("id", null), pair("titulo", "O Senhor dos Anéis"));
+    Fyxture.insert("LIVRO", pair("id", null), pair("titulo", "O Senhor dos Anéis"));
     assert_have();
     assert_current_value_of_sequence_is(1);
   }
@@ -119,7 +119,7 @@ public abstract class FyxtureTest {
   @Test public void named_insert_with_replacement() throws Throwable {
     logger.debug("");
     Fyxture.clear();
-    Fyxture.insert("livro", "festa-no-ceu", pair("titulo", "Game of Thrones"), pair("ano", 1996));
+    Fyxture.insert("LIVRO", "festa-no-ceu", pair("titulo", "Game of Thrones"), pair("ano", 1996));
     assert_have();
     assert_current_value_of_sequence_is(2);
   }
@@ -128,7 +128,7 @@ public abstract class FyxtureTest {
     logger.debug("");
     Fyxture.clear();
     create();
-    Map<String, Object> o = Fyxture.select("livro").get(0);
+    Map<String, Object> o = Fyxture.select("LIVRO").get(0);
     Assert.assertEquals(l(1l), l(o.get("ID").toString()));
     Assert.assertEquals("Dom Casmurro", o.get("TITULO"));
     Assert.assertEquals(l(1885), l(o.get("ANO").toString()));
@@ -151,7 +151,7 @@ public abstract class FyxtureTest {
     Fyxture.clear();
     create();
     create(2);
-    List<Map<String, Object>> l = Fyxture.select("livro", where("id = 1"));
+    List<Map<String, Object>> l = Fyxture.select("LIVRO", where("id = 1"));
     Assert.assertEquals(1L, l.size());
   }
 
@@ -161,7 +161,7 @@ public abstract class FyxtureTest {
     create(1, 0, 1948, "1984");
     create(2, 0, 1880, "Dom Casmurro");
     create(3, 0, 1890, "Câmara Cascudo");
-    List<Map<String, Object>> l = Fyxture.select("livro", where("titulo like '%Cas%'"));
+    List<Map<String, Object>> l = Fyxture.select("LIVRO", where("titulo like '%Cas%'"));
     Assert.assertEquals(2, l.size());
   }
 
@@ -169,17 +169,17 @@ public abstract class FyxtureTest {
     logger.debug("");
     Fyxture.clear();
     Fyxture.load("inicial");
-    assert_have(1, "livro");
-    assert_have(1, "autor");
+    assert_have(1, "LIVRO");
+    assert_have(1, "AUTOR");
   }
 
   @Test public void load_object() throws Throwable {
     logger.debug("");
     Fyxture.clear();
     Fyxture.load("outra-carga");
-    assert_have(1, "livro");
-    assert_have(3, "autor");
-    assert_have(3, "autor_livro");
+    assert_have(1, "LIVRO");
+    assert_have(3, "AUTOR");
+    assert_have(3, "AUTOR_LIVRO");
   }
 
   @Test public void verify() throws Throwable {

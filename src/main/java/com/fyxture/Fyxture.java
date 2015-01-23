@@ -88,7 +88,7 @@ public class Fyxture {
     }
     logger.debug(decoded);
 
-    Map c = m(get(fmt("%s.%s", table, s(get("config", "common.table.suffix"))), descriptor));
+    Map c = m(get(fmt("%s/%s.%s", datasource, table, s(get("config", "common.table.suffix"))), descriptor));
     logger.debug(c);
 
     logger.debug(m(get(table + ".table")));
@@ -319,6 +319,10 @@ public class Fyxture {
       }
       if(!rs.getString(11).equals("0")){
         fullsb.append(cat("\n#   ", rs.getString(4), ":  \t\t\t\t#", rs.getString(6), "(", rs.getString(7), rs.getString(9) == null ? "" : ",", rs.getString(9) == null ? "" : rs.getString(9), ")"));
+      }
+      System.out.println("" + rsmd.getColumnCount());
+      for(int i = 1; i <= rsmd.getColumnCount(); i++){
+        System.out.println(cat("" + i, rsmd.getColumnName(i), " : ", rs.getString(i)));
       }
     }
     fullsb.append("\n");
