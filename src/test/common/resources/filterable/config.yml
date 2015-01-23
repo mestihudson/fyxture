@@ -11,7 +11,7 @@ common:
     # identificador das instâncias padrão das tabelas
     default: default
     # ordem em que as tabelas devem sofrer 'delete' durante clear()
-    clear: [livro, autor]
+    clear: [LIVRO, AUTOR]
   verify:
     excludes: [schema_version]
 
@@ -45,30 +45,30 @@ datasource:
     # use '$' para não tratar o elemento seguinte como string, ou seja, não quotar a expressão
     # password: $newid()
 
-sequence: [sq_id_livro, sq_id_autor]
+sequence: [SQ_ID_LIVRO, SQ_ID_AUTOR]
 
 table:
-  livro:
+  LIVRO:
     sequence:
-      # sq_id_livro: id
-      name: sq_id_livro
-      column: id
-  autor:
+      # SQ_ID_LIVRO: ID
+      name: SQ_ID_LIVRO
+      column: ID
+  AUTOR:
     sequence:
-      # sq_id_autor: id
-      name: sq_id_autor
-      column: id
+      # SQ_ID_AUTOR: ID
+      name: SQ_ID_AUTOR
+      column: ID
 
 load:
-  inicial: [autor, livro]
+  inicial: [AUTOR, LIVRO]
   outra-carga:
-    autor: [default, segundo-autor, terceiro]
-    livro: [festa-no-ceu]
-    autor_livro: [default, segundo-autor, terceiro]
+    AUTOR: [default, segundo-autor, terceiro]
+    LIVRO: [festa-no-ceu]
+    AUTOR_LIVRO: [default, segundo-autor, terceiro]
 
 verify:
   todos:
     # verifica se todas as tabelas informadas como parametro do count tem resultado igual ao informado
-    count(autor, livro): 1
+    count(AUTOR, LIVRO): 1
     # verifica se todas as tabelas não informadas como parametro do count tem resultado igual ao informado
-    count~(autor, livro): 0
+    count~(AUTOR, LIVRO): 0

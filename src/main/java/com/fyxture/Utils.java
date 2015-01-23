@@ -54,7 +54,7 @@ public class Utils {
     String result = "";
     String pattern = "";
     for(String part : parts){
-      if(pattern.equals("")) {
+      if(pattern.equals("")){
         pattern = part;
         continue;
       }
