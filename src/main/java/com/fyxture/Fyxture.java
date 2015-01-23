@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
+import org.apache.commons.io.FileUtils;
 
 import static com.fyxture.Utils.*;
 
@@ -202,7 +203,8 @@ public class Fyxture {
               file.getParentFile().mkdirs();
             }
             file.createNewFile();
-            logger.info(attributies(table));
+            FileUtils.writeStringToFile(file, attributies(table));
+            //logger.info(attributies(table));
           }
         }
       }
@@ -295,17 +297,17 @@ public class Fyxture {
 
   private static String attributies(final String table) throws Throwable {
     
-    StringBuffer fullsb = new StringBuffer();
-    logger.info(table);
+    logger.debug(table);
 
     String min = s(get("config", "common.table.default"));
     min = min == null ? "default" : min;
-    StringBuffer minsb = new StringBuffer();
-    minsb.append("#" + min + ":\n\t");
 
-    String full = s(get("config", "common.table.full"));
-    full = full == null ? "full" : full;
-    fullsb.append("#" + full + ": [");
+    StringBuffer minsb = new StringBuffer();
+    minsb.append("#" + min + ":");
+    minsb.append("\n##not nullable attributies");
+
+    StringBuffer fullsb = new StringBuffer();
+    fullsb.append("\n##nullable attributies");
 
     String schema = s(get("config", fmt("datasource.%s.schema", datasource)));
 
@@ -313,26 +315,14 @@ public class Fyxture {
     while(rs.next()){
       ResultSetMetaData rsmd = rs.getMetaData();
       if(rs.getString(11).equals("0")){
-        minsb.append(cat("#\t", rs.getString(4), ":  #", rs.getString(6), "(", rs.getString(7), rs.getString(9) == null ? "" : ",", rs.getString(9) == null ? "" : rs.getString(9), ")\n\t"));
+        minsb.append(cat("\n#   ", rs.getString(4), ":  \t\t\t\t#", rs.getString(6), "(", rs.getString(7), rs.getString(9) == null ? "" : ",", rs.getString(9) == null ? "" : rs.getString(9), ")"));
       }
       if(!rs.getString(11).equals("0")){
-        fullsb.append(cat(comma(fullsb.toString(), "#" + full + ": ["), rs.getString(4), ":  #", rs.getString(6), "(", rs.getString(7), rs.getString(9) == null ? "" : ",", rs.getString(9) == null ? "" : rs.getString(9), ")"));
+        fullsb.append(cat("\n#   ", rs.getString(4), ":  \t\t\t\t#", rs.getString(6), "(", rs.getString(7), rs.getString(9) == null ? "" : ",", rs.getString(9) == null ? "" : rs.getString(9), ")"));
       }
-      for(int i = 1; i < 25; i++){
-        String id = (new Integer(i)).toString();
-        String name = rsmd.getColumnName(i);
-        String value = rs.getString(i);
-        logger.info(cat("" , id, " - ", name, " : ", value));
-      }
-      // logger.info(rs.getString(4));//name
-      // logger.info(rs.getString(5));//type
-      // logger.info(rs.getString(6));//typename
-      // logger.info(rs.getString(7));//size
-      // logger.info(rs.getString(11));//nullable
-      // logger.info(rs.getString(23));//autoincrement
     }
-    fullsb.append("]\n");
-    minsb.append("\n" + fullsb.toString());
+    fullsb.append("\n");
+    minsb.append(fullsb.toString());
     return minsb.toString();
   }
 

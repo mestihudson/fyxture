@@ -45,9 +45,22 @@ public class Utils {
 
   public static String cat(String initial, String... parts) {
     for(String part : parts){
-      initial = initial.concat(part);
+      initial = initial.concat(part == null ? "" : part);
     }
     return initial;
+  }
+
+  public static String join(List<String> parts) {
+    String result = "";
+    String pattern = "";
+    for(String part : parts){
+      if(pattern.equals("")) {
+        pattern = part;
+        continue;
+      }
+      result = (result.equals("") ? "" : pattern) + part;
+    }
+    return result;
   }
 
   public static String quote(Object value) {

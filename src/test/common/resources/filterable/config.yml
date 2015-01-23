@@ -10,8 +10,6 @@ common:
     suffix: table
     # identificador das instâncias padrão das tabelas
     default: default
-    # identificador das instâncias completas das tabelas
-    full: full
     # ordem em que as tabelas devem sofrer 'delete' durante clear()
     clear: [livro, autor]
   verify:

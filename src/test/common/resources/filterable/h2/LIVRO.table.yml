@@ -1,0 +1,19 @@
+#default:
+##not nullable attributies
+#   ID:  				#BIGINT(19,0)
+#   VERSION:  				#BIGINT(19,0)
+#   ANO:  				#INTEGER(10,0)
+#   TITULO:  				#VARCHAR(255,0)
+##nullable attributies
+
+default:
+  ID:
+  VERSION: 0
+  ANO: 1884
+  TITULO: Dom Casmurro
+
+festa-no-ceu:
+  ID: 2
+  VERSION: 0
+  ANO: 2004
+  TITULO: Festa no Céu
