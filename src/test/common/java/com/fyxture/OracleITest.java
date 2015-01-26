@@ -1,6 +1,6 @@
 package com.fyxture;
 
-public class OracleITest extends FyxtureTest {
+public class OracleITest extends FyxtureITest {
   public OracleITest() {
     super("oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@//fyxture:1521/xe", "fyxture", "fyxture", "oracle");
   }

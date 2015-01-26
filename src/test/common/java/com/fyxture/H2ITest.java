@@ -1,6 +1,6 @@
 package com.fyxture;
 
-public class H2ITest extends FyxtureTest {
+public class H2ITest extends FyxtureITest {
   public H2ITest() {
     super("org.h2.Driver", "jdbc:h2:target/fyxture", "sa", null, "h2");
   }

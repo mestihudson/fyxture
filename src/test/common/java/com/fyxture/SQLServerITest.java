@@ -1,6 +1,6 @@
 package com.fyxture;
 
-public class SQLServerITest extends FyxtureTest {
+public class SQLServerITest extends FyxtureITest {
   public SQLServerITest() {
     super("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sqlserver://w7:1433/fyxture", "sa", "s3nh@", "sqlserver");
   }

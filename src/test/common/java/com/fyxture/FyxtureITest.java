@@ -21,8 +21,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class FyxtureTest {
-  private static Logger logger = Logger.getLogger(FyxtureTest.class);
+public abstract class FyxtureITest {
+  private static Logger logger = Logger.getLogger(FyxtureITest.class);
 
   protected String DRIVER;
   protected String URL;
@@ -33,7 +33,7 @@ public abstract class FyxtureTest {
   protected Connection connection = null;
   protected Statement statement = null;
 
-  public FyxtureTest(String driver, String url, String user, String password, String datasource) {
+  public FyxtureITest(String driver, String url, String user, String password, String datasource) {
     DRIVER = driver;
     URL = url;
     USER = user;
