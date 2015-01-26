@@ -36,7 +36,6 @@ public class Fyxture {
   private static String password;
   private static Dialect dialect;
 
-  private static final String COUNT = "SELECT COUNT(1) FROM [%s]";
   private static final String SELECT = "SELECT %s FROM %s WHERE %s";
   private static final String NL = "\n";
 
@@ -52,7 +51,7 @@ public class Fyxture {
     for(Object table : table_names) {
       dialect.delete(s(table));
       if(tables.containsKey(table)){
-    	dialect.reset_sequence(s(table));
+        dialect.reset_sequence(s(table));
       }
     }
   }
@@ -64,7 +63,7 @@ public class Fyxture {
 
   public static Integer count(String table) throws Throwable {
     init();
-    ResultSet rs = query(fmt(COUNT, table));
+    ResultSet rs = query(fmt(dialect.count_command(), table));
     rs.next();
     return rs.getInt(1);
   }
@@ -89,8 +88,8 @@ public class Fyxture {
     logger.debug(decoded);
 
     String suffix = s(get("config", "common.table.suffix"));
-	Object o = get(fmt("%s/%s.%s", datasource, table, suffix), descriptor);
-	Map c = m(o);
+    Object o = get(fmt("%s/%s.%s", datasource, table, suffix), descriptor);
+    Map c = m(o);
     logger.debug(c);
 
     logger.debug(m(get(datasource + "/" + table + ".table")));
