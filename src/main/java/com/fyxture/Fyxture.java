@@ -88,10 +88,12 @@ public class Fyxture {
     }
     logger.debug(decoded);
 
-    Map c = m(get(fmt("%s/%s.%s", datasource, table, s(get("config", "common.table.suffix"))), descriptor));
+    String suffix = s(get("config", "common.table.suffix"));
+	Object o = get(fmt("%s/%s.%s", datasource, table, suffix), descriptor);
+	Map c = m(o);
     logger.debug(c);
 
-    logger.debug(m(get(table + ".table")));
+    logger.debug(m(get(datasource + "/" + table + ".table")));
 
     List<String> columns = new ArrayList<String>();
     List<Object> values = new ArrayList<Object>();
