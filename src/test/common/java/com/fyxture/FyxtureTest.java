@@ -108,6 +108,24 @@ public abstract class FyxtureTest {
     assert_current_value_of_sequence_is(2);
   }
 
+  @Test public void extended_insert() throws Throwable {
+    logger.debug("");
+    Fyxture.clear();
+    Fyxture.insert("AUTOR", "segundo-extend");
+    assert_have();
+    assert_current_value_of_sequence_is(2);
+  }
+
+  @Test(expected=FyxtureIllegalFormatFail.class)
+  @Ignore
+  public void expected_extended_insert() throws Throwable {
+    logger.debug("");
+    Fyxture.clear();
+    Fyxture.insert("AUTOR", "segundo-extend");
+    assert_have();
+    assert_current_value_of_sequence_is(2);
+  }
+
   @Test public void insert_with_replacement() throws Throwable {
     logger.debug("");
     Fyxture.clear();

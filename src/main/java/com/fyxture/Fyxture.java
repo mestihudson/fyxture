@@ -36,7 +36,7 @@ public class Fyxture {
   private static String password;
   private static Dialect dialect;
 
-  private static final String COUNT = "SELECT COUNT(1) FROM [%s]";
+  private static final String COUNT = "SELECT COUNT(1) FROM %s";
   private static final String SELECT = "SELECT %s FROM %s WHERE %s";
   private static final String NL = "\n";
 
@@ -81,6 +81,7 @@ public class Fyxture {
 
   public static Fyxture insert(String table, String descriptor, Pair... pairs) throws Throwable {
     init();
+    InsertCommand ic = insertCommand(datasource, table, descriptor, pairs);
 
     Map<String, Object> decoded = new LinkedHashMap<String, Object>();
     for(Pair pair : pairs){
@@ -88,19 +89,46 @@ public class Fyxture {
     }
     logger.debug(decoded);
 
-    Map c = m(get(fmt("%s/%s.%s", datasource, table, s(get("config", "common.table.suffix"))), descriptor));
-    logger.debug(c);
+    String defdes = s(get("config", "common.table.default"));
+    String suffix = s(get("config", "common.table.suffix"));
+    String tableref = fmt("%s/%s.%s", datasource, table, suffix);
+    Object o = get(tableref, descriptor);
 
-    logger.debug(m(get(table + ".table")));
-
-    List<String> columns = new ArrayList<String>();
-    List<Object> values = new ArrayList<Object>();
-    for(Object key : c.keySet()){
-      columns.add(s(key));
-      values.add(decoded.get(key) == null ? (c.get(key) == null ? null : c.get(key)) : decoded.get(key));
+    if(defdes.equals(descriptor) && o instanceof List) {
+      throw new FyxtureIllegalFormatFail("Default instance can not be extended.");
     }
-    dialect.insert(table, columns, values);
+    if(o instanceof List){
+    	o = extend(tableref, defdes, list(o));
+    }
+    if(o instanceof Map){
+      Map c = m(o);
+      logger.debug(c);
+
+      logger.debug(m(get(tableref)));
+
+      List<String> columns = new ArrayList<String>();
+      List<Object> values = new ArrayList<Object>();
+      for(Object key : c.keySet()){
+        columns.add(s(key));
+        values.add(decoded.get(key) == null ? (c.get(key) == null ? null : c.get(key)) : decoded.get(key));
+      }
+      dialect.insert(table, columns, values);
+    }
     return instance;
+  }
+
+  private Object void extend(String tableref, String defdes, List objects) {
+    Object result = get(tableref, defdes);
+    for(Object o : objects){
+      if(o instanceof String){
+        if(!o.equals(defdes)){
+          o = get(tableref, s(o));
+          if(o instanceof List){}
+          if(o instanceof Map){}
+        }
+      }
+    }
+    return result;
   }
 
   static ResultSet query(String command) throws Throwable {
@@ -173,6 +201,10 @@ public class Fyxture {
 
   public static Cols cols(String... names) {
     return new Cols(names);
+  }
+
+  public static InsertCommand insertCommand(String table, String descriptor, Pair... pairs) {
+    return new InsertCommand(table, descriptor, pairs);
   }
 
   private Fyxture(String driver, String url, String user, String password, String dialect) throws Throwable {

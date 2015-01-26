@@ -11,7 +11,7 @@ common:
     # identificador das instâncias padrão das tabelas
     default: default
     # ordem em que as tabelas devem sofrer 'delete' durante clear()
-    clear: [LIVRO, AUTOR]
+    clear: [AUTOR_LIVRO, LIVRO, AUTOR]
   verify:
     excludes: [schema_version]
 
