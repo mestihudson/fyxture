@@ -23,7 +23,7 @@ class SQLServerDialect extends Dialect {
   }
 
   void insert(InsertCommand ic) throws Throwable {
-    String sequence = fyxture.sequence(ic.table, "column");
+    String sequence = Data.sequence(ic.table, "column");
     if(sequence == null){
       super.insert(ic);
     }else{

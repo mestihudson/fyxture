@@ -20,29 +20,29 @@ class OracleDialect extends Dialect {
   }
 
   void reset_sequence(String table) throws Throwable {
-    fyxture.execute(fmt(ORACLE_SEQUENCE_DROP, fyxture.sequence(table)));
-    fyxture.execute(fmt(ORACLE_SEQUENCE_CREATE, fyxture.sequence(table), "1", "1"));
+    fyxture.execute(fmt(ORACLE_SEQUENCE_DROP, Data.sequence(table)));
+    fyxture.execute(fmt(ORACLE_SEQUENCE_CREATE, Data.sequence(table), "1", "1"));
   }
 
   void insert(InsertCommand ic) throws Throwable {
-    String column = fyxture.sequence(ic.table, "column");
+    String column = Data.sequence(ic.table, "column");
     logger.debug(column);
     if(column != null && !ic.columns.contains(column)){
-      fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, fyxture.sequence(ic.table)));
+      fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, Data.sequence(ic.table)));
       ic.columns.add(column);
       ic.values.add(current(ic.table));
     }else{
       logger.debug(ic.values.get(ic.columns.indexOf(column)));
       if(ic.values.get(ic.columns.indexOf(column)) == null){
         logger.info(column);
-        fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, fyxture.sequence(column)));
+        fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, Data.sequence(column)));
         ic.values.set(ic.columns.indexOf(column), current(ic.table));
       }else{
         Integer start = i(ic.values.get(ic.columns.indexOf(column)));
         logger.debug(start);
-        fyxture.execute(fmt(ORACLE_SEQUENCE_DROP, fyxture.sequence(ic.table)));
-        fyxture.execute(fmt(ORACLE_SEQUENCE_CREATE, fyxture.sequence(ic.table), start, start));
-        fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, fyxture.sequence(ic.table)));
+        fyxture.execute(fmt(ORACLE_SEQUENCE_DROP, Data.sequence(ic.table)));
+        fyxture.execute(fmt(ORACLE_SEQUENCE_CREATE, Data.sequence(ic.table), start, start));
+        fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, Data.sequence(ic.table)));
         ic.values.set(ic.columns.indexOf(column), current(ic.table));
       }
     }
@@ -50,7 +50,7 @@ class OracleDialect extends Dialect {
   }
 
   private Integer current(String table) throws Throwable {
-    ResultSet rs = fyxture.query(fmt(ORACLE_SEQUENCE_CURRENT, fyxture.sequence(table)));
+    ResultSet rs = fyxture.query(fmt(ORACLE_SEQUENCE_CURRENT, Data.sequence(table)));
     rs.next();
     return rs.getInt(1);
   }

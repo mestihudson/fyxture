@@ -13,8 +13,6 @@ class InsertCommand {
   private static Logger logger = Logger.getLogger(InsertCommand.class);
 
   static final String INSERT = "INSERT INTO %s (%s) VALUES (%s)";
-
-  Fyxture fyxture;
   String datasource;
   String table;
   String descriptor;
@@ -22,8 +20,7 @@ class InsertCommand {
   List<String> columns = new ArrayList<String>();
   List<Object> values = new ArrayList<Object>();
 
-  InsertCommand(Fyxture fyxture, String datasource, String table, String descriptor, Pair... pairs) throws Throwable {
-    this.fyxture = fyxture;
+  InsertCommand(String datasource, String table, String descriptor, Pair... pairs) throws Throwable {
     this.datasource = datasource;
     this.table = table;
     this.descriptor = descriptor;
@@ -37,11 +34,11 @@ class InsertCommand {
       decoded.put(pair.key, pair.value);
     }
     logger.debug(decoded);
-    String suffix = s(fyxture.get("config", "common.table.suffix"));
-    Object o = fyxture.get(fmt("%s/%s.%s", datasource, table, suffix), descriptor);
+    String suffix = Data.suffix();
+    Object o = Data.instance(datasource, table, suffix, descriptor);
     Map c = m(o);
     logger.debug(c);
-    logger.debug(m(fyxture.get(datasource + "/" + table + ".table")));
+    logger.debug(Data.instances(datasource, table, suffix));
     columns = new ArrayList<String>();
     values = new ArrayList<Object>();
     for(Object key : c.keySet()){

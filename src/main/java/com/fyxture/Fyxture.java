@@ -1,30 +1,30 @@
 package com.fyxture;
 
+import static com.fyxture.Utils.cat;
+import static com.fyxture.Utils.fmt;
+import static com.fyxture.Utils.i;
+import static com.fyxture.Utils.list;
+import static com.fyxture.Utils.m;
+import static com.fyxture.Utils.s;
+import static com.fyxture.Utils.splitrim;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.ResultSet;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-import org.yaml.snakeyaml.Yaml;
 import org.apache.commons.io.FileUtils;
-
-import static com.fyxture.Utils.*;
+import org.apache.log4j.Logger;
 
 public class Fyxture {
   private static Logger logger = Logger.getLogger(Fyxture.class);
-  private static Map<String, Object> map = new LinkedHashMap<String, Object>();
   private static Fyxture instance;
   private static Connection connection = null;
   private static Statement statement = null;
@@ -45,7 +45,7 @@ public class Fyxture {
   }
 
   public static Fyxture insert(String table) throws Throwable {    
-    insert(table, s(get("config", "common.table.default")));
+    insert(table, Data.ordinary());
     return instance;
   }
 
@@ -56,15 +56,14 @@ public class Fyxture {
 
   public static Fyxture insert(String table, String descriptor, Pair... pairs) throws Throwable {
     init();
-    InsertCommand ic = new InsertCommand(instance, datasource, table, descriptor, pairs);
-    dialect.insert(ic);
+    dialect.insert(insertCommand(datasource, table, descriptor, pairs));
     return instance;
   }
 
   public static void clear() throws Throwable {
     init();
-    Map tables = m(get("config", "table"));
-    Collection table_names = list(get("config", "common.table.clear"));
+    Map tables = Data.tables();
+    Collection table_names = Data.table_names();
     if(table_names == null || table_names.isEmpty()){
       table_names = tables.keySet();
     }
@@ -79,7 +78,7 @@ public class Fyxture {
   }
 
   public static Fyxture insert(final String table, final Pair... pairs) throws Throwable {
-    String descriptor = s(get("config", "common.table.default"));
+    String descriptor = Data.ordinary();
     insert(table, descriptor, pairs);
     return instance;
   }
@@ -137,12 +136,12 @@ public class Fyxture {
     return new Cols(names);
   }
 
-  public static InsertCommand insertCommand(Fyxture fyxture, String datasource, String table, String descriptor, Pair... pairs) throws Throwable {
-    return new InsertCommand(fyxture, datasource, table, descriptor, pairs);
+  public static InsertCommand insertCommand(String datasource, String table, String descriptor, Pair... pairs) throws Throwable {
+    return new InsertCommand(datasource, table, descriptor, pairs);
   }
 
   public static Fyxture init() throws Throwable {
-    String ds = datasource == null ? s(get("config","common.datasource.default")) : datasource;
+    String ds = datasource == null ? Data.datasource() : datasource;
     logger.debug(ds);
     return init(ds);
   }
@@ -160,7 +159,7 @@ public class Fyxture {
   public static Fyxture verify(String name) throws Throwable {
     init();
     logger.debug(name);
-    Object o = get("config", fmt("verify.%s", name));
+    Object o = Data.verify(name);
     if(o instanceof String) {
       return verify(s(o));
     }
@@ -200,7 +199,7 @@ public class Fyxture {
   public static Fyxture load(String name) throws Throwable {
     init();
     logger.debug(name);
-    Object o = get("config", fmt("load.%s", name));
+    Object o = Data.loader(name);
     if(o != null){
       if(o instanceof String){
         return load(s(o));
@@ -249,25 +248,9 @@ public class Fyxture {
     return statement.executeQuery(command);
   }
 
-  String sequence(String table) throws Throwable {
-    return sequence(table, "name");
-  }
-
-  String sequence(String table, String property) throws Throwable {
-    return s(get("config", fmt("table.%s.sequence.%s", table, property)));
-  }
-
-  static Object get(String filename, String... path) throws Throwable {
-    Object o = cargo(filename);
-    if(path.length != 0){
-      o = path.length > 1 ? seg(o, path) : ges(o, path[0]);
-    }
-    return o;
-  }
-
   private static List<String> alldbtables() throws Throwable {
-    List excludes = list(get("config", "common.verify.excludes"));
-    String schema = s(get("config", fmt("datasource.%s.schema", datasource)));
+    List excludes = list(Data.get("config", "common.verify.excludes"));
+    String schema = s(Data.get("config", fmt("datasource.%s.schema", datasource)));
     List<String> c = new ArrayList<String>();
     ResultSet rs = connection.getMetaData().getTables(null, schema, "%", new String[] {"TABLE"});
     while(rs.next()){
@@ -280,7 +263,7 @@ public class Fyxture {
     
     logger.debug(table);
 
-    String min = s(get("config", "common.table.default"));
+    String min = Data.ordinary();
     min = min == null ? "default" : min;
 
     StringBuffer minsb = new StringBuffer();
@@ -290,7 +273,7 @@ public class Fyxture {
     StringBuffer fullsb = new StringBuffer();
     fullsb.append("\n##nullable attributies");
 
-    String schema = s(get("config", fmt("datasource.%s.schema", datasource)));
+    String schema = Data.schema(datasource);
 
     ResultSet rs = connection.getMetaData().getColumns(null, schema, table, "%");
     while(rs.next()){
@@ -316,8 +299,8 @@ public class Fyxture {
   }
 
   private static List<String> dbtables(final String pattern) throws Throwable {
-    List excludes = list(get("config", "common.verify.excludes"));
-    String schema = s(get("config", fmt("datasource.%s.schema", datasource)));
+    List excludes = Data.excludes();
+    String schema = Data.schema(datasource);
     List<String> c = new ArrayList<String>();
     ResultSet rs = connection.getMetaData().getTables(null, schema, pattern, new String[] {"TABLE"});
     while(rs.next()){
@@ -329,41 +312,6 @@ public class Fyxture {
     return c;
   }
 
-  private static Object ges(Object o, String path) {
-    Object result = seg(o, path.split("\\."));
-    return result;
-  }
-
-  private static Object seg(Object o, String... p) {
-    Object no = o instanceof Map ? m(o).get(p[0]) : o;
-    try{
-      return seg(no, extract(p, 0));
-    }catch(Throwable t){
-      return no;
-    }
-  }
-
-  private static String [] extract(String [] a, int position) {
-    List<String> n = new ArrayList<String>(Arrays.asList(a));
-    n.remove(position);
-    String [] re = new String[n.size()];
-    for(String e : n){
-      re[n.indexOf(e)] = e;
-    }
-    return re;
-  }
-
-  private static Object cargo(String filename) throws Throwable {
-    if(map.get(filename) == null) {
-      String filepath = Utils.class.getClassLoader().getResource(filename.concat(".yml")).getPath();
-      logger.debug(filepath);
-      InputStream input = new FileInputStream(new File(filepath));
-      Yaml yaml = new Yaml();
-      map.put(filename, yaml.load(input));
-    }
-    return map.get(filename);
-  }
-
   private Fyxture(String driver, String url, String user, String password, String dialect) throws Throwable {
     Class.forName(this.driver = driver).newInstance();
     this.statement = (this.connection = DriverManager.getConnection(this.url = url, this.user = user, this.password = password)).createStatement();
@@ -372,10 +320,10 @@ public class Fyxture {
   }
 
   private void auto() throws Throwable {
-    String auto = s(get("config", "common.table.auto"));
+    String auto = Data.auto();
     logger.debug(dbtables());
     if(auto != null){
-      String suffix = s(get("config", "common.table.suffix"));
+      String suffix = Data.suffix();
       logger.debug(suffix);
       for(String table : dbtables()){
         String filename = cat(datasource, "/", table, ".", suffix, ".yml");
@@ -393,7 +341,6 @@ public class Fyxture {
             }
             file.createNewFile();
             FileUtils.writeStringToFile(file, attributies(table));
-            //logger.info(attributies(table));
           }
         }
       }
@@ -419,11 +366,11 @@ public class Fyxture {
 
   private static Fyxture getInstance() throws Throwable {
     return new Fyxture(
-      s(get("config", fmt("datasource.%s.driver", datasource))),
-      s(get("config", fmt("datasource.%s.url", datasource))),
-      s(get("config", fmt("datasource.%s.user", datasource))),
-      s(get("config", fmt("datasource.%s.password", datasource))),
-      s(get("config", fmt("datasource.%s.dialect", datasource)))
+      Data.driver(datasource),
+      Data.url(datasource),
+      Data.user(datasource),
+      Data.password(datasource),
+      Data.dialect(datasource)
     );
   }
 }
