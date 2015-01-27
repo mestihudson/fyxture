@@ -24,29 +24,29 @@ class OracleDialect extends Dialect {
     fyxture.execute(fmt(ORACLE_SEQUENCE_CREATE, fyxture.sequence(table), "1", "1"));
   }
 
-  void insert(String table, List<String> columns, List<Object> values) throws Throwable {
-    String column = fyxture.sequence(table, "column");
+  void insert(InsertCommand ic) throws Throwable {
+    String column = fyxture.sequence(ic.table, "column");
     logger.debug(column);
-    if(column != null && !columns.contains(column)){
-      fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, fyxture.sequence(table)));
-      columns.add(column);
-      values.add(current(table));
+    if(column != null && !ic.columns.contains(column)){
+      fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, fyxture.sequence(ic.table)));
+      ic.columns.add(column);
+      ic.values.add(current(ic.table));
     }else{
-      logger.debug(values.get(columns.indexOf(column)));
-      if(values.get(columns.indexOf(column)) == null){
+      logger.debug(ic.values.get(ic.columns.indexOf(column)));
+      if(ic.values.get(ic.columns.indexOf(column)) == null){
         logger.info(column);
         fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, fyxture.sequence(column)));
-        values.set(columns.indexOf(column), current(table));
+        ic.values.set(ic.columns.indexOf(column), current(ic.table));
       }else{
-        Integer start = i(values.get(columns.indexOf(column)));
+        Integer start = i(ic.values.get(ic.columns.indexOf(column)));
         logger.debug(start);
-        fyxture.execute(fmt(ORACLE_SEQUENCE_DROP, fyxture.sequence(table)));
-        fyxture.execute(fmt(ORACLE_SEQUENCE_CREATE, fyxture.sequence(table), start, start));
-        fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, fyxture.sequence(table)));
-        values.set(columns.indexOf(column), current(table));
+        fyxture.execute(fmt(ORACLE_SEQUENCE_DROP, fyxture.sequence(ic.table)));
+        fyxture.execute(fmt(ORACLE_SEQUENCE_CREATE, fyxture.sequence(ic.table), start, start));
+        fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, fyxture.sequence(ic.table)));
+        ic.values.set(ic.columns.indexOf(column), current(ic.table));
       }
     }
-    super.insert(table, columns, values);
+    super.insert(ic);
   }
 
   private Integer current(String table) throws Throwable {

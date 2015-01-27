@@ -24,7 +24,6 @@ import static com.fyxture.Utils.*;
 
 public class Fyxture {
   private static Logger logger = Logger.getLogger(Fyxture.class);
-
   private static Map<String, Object> map = new LinkedHashMap<String, Object>();
   private static Fyxture instance;
   private static Connection connection = null;
@@ -35,31 +34,8 @@ public class Fyxture {
   private static String user;
   private static String password;
   private static Dialect dialect;
-
   private static final String SELECT = "SELECT %s FROM %s WHERE %s";
   private static final String NL = "\n";
-
-  public static void clear() throws Throwable {
-    init();
-    Map tables = m(get("config", "table"));
-    Collection table_names = list(get("config", "common.table.clear"));
-    if(table_names == null || table_names.isEmpty()){
-      table_names = tables.keySet();
-    }
-    logger.debug(tables);
-    logger.debug(table_names);
-    for(Object table : table_names) {
-      dialect.delete(s(table));
-      if(tables.containsKey(table)){
-        dialect.reset_sequence(s(table));
-      }
-    }
-  }
-
-  void execute(String command) throws Throwable {
-    logger.debug(command);
-    statement.execute(command);
-  }
 
   public static Integer count(String table) throws Throwable {
     init();
@@ -80,40 +56,26 @@ public class Fyxture {
 
   public static Fyxture insert(String table, String descriptor, Pair... pairs) throws Throwable {
     init();
-
-    Map<String, Object> decoded = new LinkedHashMap<String, Object>();
-    for(Pair pair : pairs){
-      decoded.put(pair.key, pair.value);
-    }
-    logger.debug(decoded);
-
-    String suffix = s(get("config", "common.table.suffix"));
-    Object o = get(fmt("%s/%s.%s", datasource, table, suffix), descriptor);
-    Map c = m(o);
-    logger.debug(c);
-
-    logger.debug(m(get(datasource + "/" + table + ".table")));
-
-    List<String> columns = new ArrayList<String>();
-    List<Object> values = new ArrayList<Object>();
-    for(Object key : c.keySet()){
-      columns.add(s(key));
-      values.add(decoded.get(key) == null ? (c.get(key) == null ? null : c.get(key)) : decoded.get(key));
-    }
-    dialect.insert(table, columns, values);
+    InsertCommand ic = new InsertCommand(instance, datasource, table, descriptor, pairs);
+    dialect.insert(ic);
     return instance;
   }
 
-  static ResultSet query(String command) throws Throwable {
-    return statement.executeQuery(command);
-  }
-
-  String sequence(String table) throws Throwable {
-    return sequence(table, "name");
-  }
-
-  String sequence(String table, String property) throws Throwable {
-    return s(get("config", fmt("table.%s.sequence.%s", table, property)));
+  public static void clear() throws Throwable {
+    init();
+    Map tables = m(get("config", "table"));
+    Collection table_names = list(get("config", "common.table.clear"));
+    if(table_names == null || table_names.isEmpty()){
+      table_names = tables.keySet();
+    }
+    logger.debug(tables);
+    logger.debug(table_names);
+    for(Object table : table_names) {
+      dialect.delete(s(table));
+      if(tables.containsKey(table)){
+        dialect.reset_sequence(s(table));
+      }
+    }
   }
 
   public static Fyxture insert(final String table, final Pair... pairs) throws Throwable {
@@ -133,7 +95,6 @@ public class Fyxture {
       }
       cols = cols + ", " + name;
     }
-
     String conditions_clause = where.clause == null ? "1=1" : where.clause;
 
     String command = fmt(SELECT, cols, table, conditions_clause);
@@ -176,57 +137,8 @@ public class Fyxture {
     return new Cols(names);
   }
 
-  private Fyxture(String driver, String url, String user, String password, String dialect) throws Throwable {
-    Class.forName(this.driver = driver).newInstance();
-    this.statement = (this.connection = DriverManager.getConnection(this.url = url, this.user = user, this.password = password)).createStatement();
-    dialect(dialect);
-    auto();
-  }
-
-  private void auto() throws Throwable {
-    String auto = s(get("config", "common.table.auto"));
-    logger.debug(dbtables());
-    if(auto != null){
-      String suffix = s(get("config", "common.table.suffix"));
-      logger.debug(suffix);
-      for(String table : dbtables()){
-        String filename = cat(datasource, "/", table, ".", suffix, ".yml");
-        logger.debug(filename);
-        try{
-          Utils.class.getClassLoader().getResource(filename).getPath();
-          logger.debug("   existe");
-        }catch(Throwable t) {
-          logger.debug("   não existe");
-          File file = new File(cat(auto, "/", filename));
-          logger.debug(file.getAbsolutePath());
-          if(!file.exists()){
-            if(!file.getParentFile().exists()){
-              file.getParentFile().mkdirs();
-            }
-            file.createNewFile();
-            FileUtils.writeStringToFile(file, attributies(table));
-            //logger.info(attributies(table));
-          }
-        }
-      }
-    }
-  }
-
-  private void dialect(String descriptor) {
-    logger.debug(descriptor);
-    if(descriptor.equals("h2")){
-      dialect = new H2Dialect(this);
-      return;
-    }
-    if(descriptor.equals("oracle")){
-      dialect = new OracleDialect(this);
-      return;
-    }
-    if(descriptor.equals("sqlserver")){
-      dialect = new SQLServerDialect(this);
-      return;
-    }
-    throw new IllegalArgumentException("Incorrect Dialect Code");
+  public static InsertCommand insertCommand(Fyxture fyxture, String datasource, String table, String descriptor, Pair... pairs) throws Throwable {
+    return new InsertCommand(fyxture, datasource, table, descriptor, pairs);
   }
 
   public static Fyxture init() throws Throwable {
@@ -283,6 +195,74 @@ public class Fyxture {
       }
     }
     return instance;
+  }
+
+  public static Fyxture load(String name) throws Throwable {
+    init();
+    logger.debug(name);
+    Object o = get("config", fmt("load.%s", name));
+    if(o != null){
+      if(o instanceof String){
+        return load(s(o));
+      }
+      if(o instanceof List){
+        for(Object t : list(o)){
+          if(t instanceof Map) {
+            for(Object k : m(t).keySet()){
+              Object v = m(t).get(k);
+              if(v instanceof String) {
+                insert(s(k), s(v));
+              }
+              if(v instanceof List) {
+                for(Object e : list(v)) {
+                  insert(s(k), s(e));
+                }
+              }
+            }
+          }
+          if(t instanceof String) {
+            insert(s(t));
+          }
+          logger.info(t != null ? t.getClass() : null);
+          logger.info(t != null ? t : null);
+          
+        }
+      }
+      if(o instanceof Map){
+        for(Object t : m(o).keySet()){
+          Object v = m(o).get(t);
+          for(Object i : list(v)){
+            insert(s(t), s(i));
+          }
+        }
+      }
+    }
+    return instance;
+  }
+
+  void execute(String command) throws Throwable {
+    logger.debug(command);
+    statement.execute(command);
+  }
+
+  static ResultSet query(String command) throws Throwable {
+    return statement.executeQuery(command);
+  }
+
+  String sequence(String table) throws Throwable {
+    return sequence(table, "name");
+  }
+
+  String sequence(String table, String property) throws Throwable {
+    return s(get("config", fmt("table.%s.sequence.%s", table, property)));
+  }
+
+  static Object get(String filename, String... path) throws Throwable {
+    Object o = cargo(filename);
+    if(path.length != 0){
+      o = path.length > 1 ? seg(o, path) : ges(o, path[0]);
+    }
+    return o;
   }
 
   private static List<String> alldbtables() throws Throwable {
@@ -349,68 +329,6 @@ public class Fyxture {
     return c;
   }
 
-  public static Fyxture load(String name) throws Throwable {
-    init();
-    logger.debug(name);
-    Object o = get("config", fmt("load.%s", name));
-    if(o != null){
-      if(o instanceof String){
-        return load(s(o));
-      }
-      if(o instanceof List){
-        for(Object t : list(o)){
-          if(t instanceof Map) {
-            for(Object k : m(t).keySet()){
-              Object v = m(t).get(k);
-              if(v instanceof String) {
-                insert(s(k), s(v));
-              }
-              if(v instanceof List) {
-                for(Object e : list(v)) {
-                  insert(s(k), s(e));
-                }
-              }
-            }
-          }
-          if(t instanceof String) {
-            insert(s(t));
-          }
-          logger.info(t != null ? t.getClass() : null);
-          logger.info(t != null ? t : null);
-          
-        }
-      }
-      if(o instanceof Map){
-        for(Object t : m(o).keySet()){
-          Object v = m(o).get(t);
-          for(Object i : list(v)){
-            insert(s(t), s(i));
-          }
-        }
-      }
-    }
-    return instance;
-  }
-
-
-  private static Fyxture getInstance() throws Throwable {
-    return new Fyxture(
-      s(get("config", fmt("datasource.%s.driver", datasource))),
-      s(get("config", fmt("datasource.%s.url", datasource))),
-      s(get("config", fmt("datasource.%s.user", datasource))),
-      s(get("config", fmt("datasource.%s.password", datasource))),
-      s(get("config", fmt("datasource.%s.dialect", datasource)))
-    );
-  }
-
-  private static Object get(String filename, String... path) throws Throwable {
-    Object o = cargo(filename);
-    if(path.length != 0){
-      o = path.length > 1 ? seg(o, path) : ges(o, path[0]);
-    }
-    return o;
-  }
-
   private static Object ges(Object o, String path) {
     Object result = seg(o, path.split("\\."));
     return result;
@@ -444,5 +362,68 @@ public class Fyxture {
       map.put(filename, yaml.load(input));
     }
     return map.get(filename);
+  }
+
+  private Fyxture(String driver, String url, String user, String password, String dialect) throws Throwable {
+    Class.forName(this.driver = driver).newInstance();
+    this.statement = (this.connection = DriverManager.getConnection(this.url = url, this.user = user, this.password = password)).createStatement();
+    dialect(dialect);
+    auto();
+  }
+
+  private void auto() throws Throwable {
+    String auto = s(get("config", "common.table.auto"));
+    logger.debug(dbtables());
+    if(auto != null){
+      String suffix = s(get("config", "common.table.suffix"));
+      logger.debug(suffix);
+      for(String table : dbtables()){
+        String filename = cat(datasource, "/", table, ".", suffix, ".yml");
+        logger.debug(filename);
+        try{
+          Utils.class.getClassLoader().getResource(filename).getPath();
+          logger.debug("   existe");
+        }catch(Throwable t) {
+          logger.debug("   não existe");
+          File file = new File(cat(auto, "/", filename));
+          logger.debug(file.getAbsolutePath());
+          if(!file.exists()){
+            if(!file.getParentFile().exists()){
+              file.getParentFile().mkdirs();
+            }
+            file.createNewFile();
+            FileUtils.writeStringToFile(file, attributies(table));
+            //logger.info(attributies(table));
+          }
+        }
+      }
+    }
+  }
+
+  private void dialect(String descriptor) {
+    logger.debug(descriptor);
+    if(descriptor.equals("h2")){
+      dialect = new H2Dialect(this);
+      return;
+    }
+    if(descriptor.equals("oracle")){
+      dialect = new OracleDialect(this);
+      return;
+    }
+    if(descriptor.equals("sqlserver")){
+      dialect = new SQLServerDialect(this);
+      return;
+    }
+    throw new IllegalArgumentException("Incorrect Dialect Code");
+  }
+
+  private static Fyxture getInstance() throws Throwable {
+    return new Fyxture(
+      s(get("config", fmt("datasource.%s.driver", datasource))),
+      s(get("config", fmt("datasource.%s.url", datasource))),
+      s(get("config", fmt("datasource.%s.user", datasource))),
+      s(get("config", fmt("datasource.%s.password", datasource))),
+      s(get("config", fmt("datasource.%s.dialect", datasource)))
+    );
   }
 }

@@ -22,23 +22,23 @@ class SQLServerDialect extends Dialect {
     fyxture.execute(fmt(SQLSERVER_SEQUENCE_ALTER, table, "1", "1"));
   }
 
-  void insert(String table, List<String> columns, List<Object> values) throws Throwable {
-    String sequence = fyxture.sequence(table, "column");
+  void insert(InsertCommand ic) throws Throwable {
+    String sequence = fyxture.sequence(ic.table, "column");
     if(sequence == null){
-      super.insert(table, columns, values);
+      super.insert(ic);
     }else{
-      if(!columns.contains(sequence)){
-        columns.add(sequence);
-        values.add(current(table));
+      if(!ic.columns.contains(sequence)){
+        ic.columns.add(sequence);
+        ic.values.add(current(ic.table));
       }else{
-        Object value = values.get(columns.indexOf(sequence));
+        Object value = ic.values.get(ic.columns.indexOf(sequence));
         if(value == null){
-          value = current(table);
+          value = current(ic.table);
         }
       }
-      fyxture.execute(fmt(SQLSERVER_IDENTITY_INSERT, table, "ON"));
-      super.insert(table, columns, values);
-      fyxture.execute(fmt(SQLSERVER_IDENTITY_INSERT, table, "OFF"));
+      fyxture.execute(fmt(SQLSERVER_IDENTITY_INSERT, ic.table, "ON"));
+      super.insert(ic);
+      fyxture.execute(fmt(SQLSERVER_IDENTITY_INSERT, ic.table, "OFF"));
     }
   }
 

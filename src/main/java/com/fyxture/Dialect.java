@@ -11,7 +11,6 @@ abstract class Dialect {
 
   private static final String COUNT = "SELECT COUNT(1) FROM [%s]";
   static final String DELETE = "DELETE FROM %s";
-  static final String INSERT = "INSERT INTO %s (%s) VALUES (%s)";
   Fyxture fyxture;
 
   Dialect(Fyxture fyxture) {
@@ -25,23 +24,10 @@ abstract class Dialect {
     fyxture.execute(fmt(DELETE, table));
   }
 
-  void insert(String table, List<String> columns, List<Object> values) throws Throwable {
-    String command = insert_command(table, columns, values);
+  void insert(InsertCommand ic) throws Throwable {
+    String command = ic.toString();
     logger.debug(command);
     fyxture.execute(command);
-  }
-
-  String insert_command(String table, List<String> columns, List<Object> values) throws Throwable {
-    String cols = "";
-    String vals = "";
-    for(String column : columns){
-      Object value = values.get(columns.indexOf(column));
-      logger.debug(column);
-      logger.debug(value);
-      cols = cat(cols, comma(cols) + column);
-      vals = cat(vals, comma(vals) + quote(value));
-    }
-    return fmt(INSERT, table, cols, vals);
   }
 
   String count_command() {
