@@ -100,6 +100,14 @@ public abstract class FyxtureITest {
     assert_current_value_of_sequence_is(1);
   }
 
+  @Test public void extended_insert() throws Throwable {
+    logger.debug("");
+    Fyxture.clear();
+    Fyxture.insert("AUTOR", "segundo-extend");
+    assert_have();
+    assert_current_value_of_sequence_is(1);
+  }
+
   @Test public void named_insert() throws Throwable {
     logger.debug("");
     Fyxture.clear();

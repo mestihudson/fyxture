@@ -36,6 +36,14 @@ class InsertCommand {
     logger.debug(decoded);
     String suffix = Data.suffix();
     Object o = Data.instance(datasource, table, suffix, descriptor);
+    if(o instanceof List){
+      Object def = Data.instance(datasource, table, suffix, Data.ordinary());
+      for(Object e : o){
+        for(Object k : m(e).keySet()){
+          def.put(k, m(e).get(k));
+        }
+      }
+    }
     Map c = m(o);
     logger.debug(c);
     logger.debug(Data.instances(datasource, table, suffix));
