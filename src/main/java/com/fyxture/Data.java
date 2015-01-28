@@ -131,34 +131,34 @@ public class Data {
     return s(get("config", fmt("datasource.%s.dialect", datasource)));
   }
 
-  public static Object instances(String datasource, String table, String suffix) throws Throwable {
-    return Data.get(datasource + "/" + table + "." + suffix);
+  public static Object instances(String datasource, String table) throws Throwable {
+    return get(fmt("%s/%s.%s", datasource, table, suffix()));
   }
 
-  public static Object instance(String datasource, String table, String suffix, String descriptor) throws Throwable {
-    return get(fmt("%s/%s.%s", datasource, table, suffix), descriptor);
+  public static Object instance(String datasource, String table) throws Throwable {
+    return get(fmt("%s/%s.%s", datasource, table, suffix()), ordinary());
   }
 
-  // private Object instance(String descriptor) throws Throwable {
-  //   return instance(descriptor, Data.instance(datasource, table, Data.suffix(), Data.ordinary()));
-  // }
+  public static Object instance(String datasource, String table, String descriptor) throws Throwable {
+    return instance(datasource, table, descriptor, instance(datasource, table));
+  }
 
-  // private Object instance(String descriptor, Object def) throws Throwable {
-  //   Object o = Data.instance(datasource, table, Data.suffix(), descriptor);
-  //   if(o instanceof Map){
-  //     return o;
-  //   }else{
-  //     Map target = new LinkedHashMap();
-  //     target.putAll(m(def));
-  //     if(o instanceof List){
-  //       for(Object e : list(o)){
-  //         if(e instanceof String){
-  //           e = instance(s(e), target);
-  //         }
-  //         target.putAll(m(e));
-  //       }
-  //     }
-  //     return target;
-  //   }
-  // }
+  private static Object instance(String datasource, String table, String descriptor, Object source) throws Throwable {
+    Object o = get(fmt("%s/%s.%s", datasource, table, suffix()), descriptor);
+    if(o instanceof Map){
+      return o;
+    }else{
+      Map target = new LinkedHashMap();
+      target.putAll(m(source));
+      if(o instanceof List){
+        for(Object e : list(o)){
+          if(e instanceof String){
+            e = instance(datasource, table, s(e), target);
+          }
+          target.putAll(m(e));
+        }
+      }
+      return target;
+    }
+  }
 }
