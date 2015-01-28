@@ -136,7 +136,7 @@ public class Data {
   }
 
   public static Object instance(String datasource, String table) throws Throwable {
-    return get(fmt("%s/%s.%s", datasource, table, suffix()), ordinary());
+    return m(instances(datasource, table)).get(ordinary());
   }
 
   public static Object instance(String datasource, String table, String descriptor) throws Throwable {
@@ -144,7 +144,7 @@ public class Data {
   }
 
   private static Object instance(String datasource, String table, String descriptor, Object source) throws Throwable {
-    Object o = get(fmt("%s/%s.%s", datasource, table, suffix()), descriptor);
+    Object o = m(instances(datasource, table)).get(descriptor);
     if(o instanceof Map){
       return o;
     }else{
