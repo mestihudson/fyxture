@@ -26,6 +26,7 @@ datasource:
     password:
   oracle:
     dialect: oracle
+    schema: FYXTURE
     driver: oracle.jdbc.driver.OracleDriver
     url: jdbc:oracle:thin:@//fyxture:1521/xe
     user: fyxture

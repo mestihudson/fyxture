@@ -9,7 +9,7 @@ import java.util.List;
 abstract class Dialect {
   private static Logger logger = Logger.getLogger(Dialect.class);
 
-  private static final String COUNT = "SELECT COUNT(1) FROM [%s]";
+  private static final String COUNT = "SELECT COUNT(1) FROM %s";
   static final String DELETE = "DELETE FROM %s";
   Fyxture fyxture;
 
