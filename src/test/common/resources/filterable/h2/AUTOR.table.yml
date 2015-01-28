@@ -14,9 +14,16 @@ segundo-autor:
   NOME: Segundo
 
 terceiro:
-  VERSION: 0
+  VERSION: 1        # {LIVRO: primeiro} ou (LIVRO: primeiro) ou (LIVRO, primeiro) ou [LIVRO: primeiro] ou [LIVRO, primeiro]
   NOME: Terceiro
 
 segundo-extend: [{NOME: Segundo}]
 
-terceiro-extend: [segundo-extend, {NOME: Terceiro}]
+referencia-indireta-extend: [terceiro, {NOME: Referencia Indireta}]
+
+outra-referencia: [
+  segundo-autor,
+  referencia-indireta-extend,
+  {VERSION: 2},
+  terceiro
+]

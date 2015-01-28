@@ -138,4 +138,27 @@ public class Data {
   public static Object instance(String datasource, String table, String suffix, String descriptor) throws Throwable {
     return get(fmt("%s/%s.%s", datasource, table, suffix), descriptor);
   }
+
+  // private Object instance(String descriptor) throws Throwable {
+  //   return instance(descriptor, Data.instance(datasource, table, Data.suffix(), Data.ordinary()));
+  // }
+
+  // private Object instance(String descriptor, Object def) throws Throwable {
+  //   Object o = Data.instance(datasource, table, Data.suffix(), descriptor);
+  //   if(o instanceof Map){
+  //     return o;
+  //   }else{
+  //     Map target = new LinkedHashMap();
+  //     target.putAll(m(def));
+  //     if(o instanceof List){
+  //       for(Object e : list(o)){
+  //         if(e instanceof String){
+  //           e = instance(s(e), target);
+  //         }
+  //         target.putAll(m(e));
+  //       }
+  //     }
+  //     return target;
+  //   }
+  // }
 }

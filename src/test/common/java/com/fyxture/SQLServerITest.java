@@ -12,6 +12,10 @@ public class SQLServerITest extends FyxtureITest {
   }
 
   protected String get_command_for_assert_current_value_of_sequence_is() {
-    return "SELECT IDENT_CURRENT('LIVRO')";
+    return get_command_for_assert_current_value_of_sequence_is("LIVRO");
+  }
+
+  protected String get_command_for_assert_current_value_of_sequence_is(String name) {
+    return "SELECT IDENT_CURRENT('" + name + "')";
   }
 }

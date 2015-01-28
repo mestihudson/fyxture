@@ -104,8 +104,20 @@ public abstract class FyxtureITest {
     logger.debug("");
     Fyxture.clear();
     Fyxture.insert("AUTOR", "segundo-extend");
-    assert_have();
-    assert_current_value_of_sequence_is(1);
+    assert_have("SELECT * FROM AUTOR WHERE NOME='Segundo'");
+    assert_current_value_of_sequence_is(1, "SQ_ID_AUTOR");
+
+    logger.debug("");
+    Fyxture.clear();
+    Fyxture.insert("AUTOR", "referencia-indireta-extend");
+    assert_have("SELECT * FROM AUTOR WHERE NOME='Referencia Indireta' AND VERSION = 1");
+    assert_current_value_of_sequence_is(1, "SQ_ID_AUTOR");
+
+    logger.debug("");
+    Fyxture.clear();
+    Fyxture.insert("AUTOR", "outra-referencia");
+    assert_have("SELECT * FROM AUTOR WHERE NOME='Terceiro' AND VERSION = 1");
+    assert_current_value_of_sequence_is(1, "SQ_ID_AUTOR");
   }
 
   @Test public void named_insert() throws Throwable {
@@ -224,9 +236,13 @@ public abstract class FyxtureITest {
     Assert.assertThat(rs.getInt(1), Matchers.equalTo(quantity));
   }
 
-  private void assert_have() throws Throwable {
+  private void assert_have(String query) throws Throwable {
     logger.debug("");
-    Assert.assertThat(statement.executeQuery("SELECT * FROM LIVRO").next(), Matchers.equalTo(true));
+    Assert.assertThat(statement.executeQuery(query).next(), Matchers.equalTo(true));
+  }
+
+  private void assert_have() throws Throwable {
+    assert_have("SELECT * FROM LIVRO");
   }
 
   protected void execute(String command) throws Throwable {
@@ -238,11 +254,17 @@ public abstract class FyxtureITest {
     return statement.executeQuery(command);
   }
 
-  protected void assert_current_value_of_sequence_is(Integer value) throws Throwable {
-    ResultSet rs = query(get_command_for_assert_current_value_of_sequence_is());
+  protected void assert_current_value_of_sequence_is(Integer value, String name) throws Throwable {
+    ResultSet rs = query(get_command_for_assert_current_value_of_sequence_is(name));
     rs.next();
-    Assert.assertThat(value, Matchers.equalTo(rs.getInt(1)));
+    Assert.assertThat(rs.getInt(1), Matchers.equalTo(value));
+  }
+
+  protected void assert_current_value_of_sequence_is(Integer value) throws Throwable {
+    assert_current_value_of_sequence_is(value, "SQ_ID_LIVRO");
   }
 
   protected abstract String get_command_for_assert_current_value_of_sequence_is() throws Throwable;
+
+  protected abstract String get_command_for_assert_current_value_of_sequence_is(String name) throws Throwable;
 }

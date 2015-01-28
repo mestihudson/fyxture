@@ -34,19 +34,9 @@ class InsertCommand {
       decoded.put(pair.key, pair.value);
     }
     logger.debug(decoded);
-    String suffix = Data.suffix();
-    Object o = Data.instance(datasource, table, suffix, descriptor);
-    if(o instanceof List){
-      Object def = Data.instance(datasource, table, suffix, Data.ordinary());
-      for(Object e : o){
-        for(Object k : m(e).keySet()){
-          def.put(k, m(e).get(k));
-        }
-      }
-    }
-    Map c = m(o);
+    Map c = m(instance(this.descriptor));
     logger.debug(c);
-    logger.debug(Data.instances(datasource, table, suffix));
+    logger.debug(Data.instances(datasource, table, Data.suffix()));
     columns = new ArrayList<String>();
     values = new ArrayList<Object>();
     for(Object key : c.keySet()){
@@ -66,5 +56,28 @@ class InsertCommand {
       vals = cat(vals, comma(vals) + quote(value));
     }
     return fmt(INSERT, table, cols, vals);
+  }
+
+  private Object instance(String descriptor) throws Throwable {
+    return instance(descriptor, Data.instance(datasource, table, Data.suffix(), Data.ordinary()));
+  }
+
+  private Object instance(String descriptor, Object def) throws Throwable {
+    Object o = Data.instance(datasource, table, Data.suffix(), descriptor);
+    if(o instanceof Map){
+      return o;
+    }else{
+      Map target = new LinkedHashMap();
+      target.putAll(m(def));
+      if(o instanceof List){
+        for(Object e : list(o)){
+          if(e instanceof String){
+            e = instance(s(e), target);
+          }
+          target.putAll(m(e));
+        }
+      }
+      return target;
+    }
   }
 }
