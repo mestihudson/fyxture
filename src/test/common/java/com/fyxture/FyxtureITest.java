@@ -120,6 +120,17 @@ public abstract class FyxtureITest {
     assert_current_value_of_sequence_is(1, "SQ_ID_AUTOR");
   }
 
+  @Test public void auto_insert() throws Throwable {
+    logger.debug("");
+    Fyxture.clear();
+    Fyxture.insert("AUTOR_LIVRO", "auto-insert");
+    assert_have("SELECT * FROM AUTOR_LIVRO WHERE AUTOR_ID = 1 AND LIVRO_ID = 1");
+    assert_have("SELECT * FROM AUTOR WHERE ID = 1");
+    assert_have("SELECT * FROM LIVRO WHERE ID = 1");
+    assert_current_value_of_sequence_is(1, "SQ_ID_AUTOR");
+    assert_current_value_of_sequence_is(1, "SQ_ID_LIVRO");
+  }
+
   @Test public void named_insert() throws Throwable {
     logger.debug("");
     Fyxture.clear();

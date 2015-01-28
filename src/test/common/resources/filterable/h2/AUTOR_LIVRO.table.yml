@@ -15,3 +15,8 @@ segundo-autor:
 terceiro:
   AUTOR_ID: 3
   LIVRO_ID: 2
+
+# futura feature
+# auto-insert:
+#   AUTOR_ID: {AUTOR:}
+#   LIVRO_ID: {LIVRO:}
