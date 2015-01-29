@@ -6,8 +6,12 @@ public class OracleITest extends FyxtureITest {
   }
 
   protected void assert_current_value_of_sequence_is(Integer value) throws Throwable {
-    execute("SELECT SQ_ID_LIVRO.NEXTVAL FROM DUAL");
-    super.assert_current_value_of_sequence_is(value + 1);
+    assert_current_value_of_sequence_is(value, "SQ_ID_LIVRO");
+  }
+
+  protected void assert_current_value_of_sequence_is(Integer value, String name) throws Throwable {
+    execute("SELECT " + name + ".NEXTVAL FROM DUAL");
+    super.assert_current_value_of_sequence_is(value + 1, name);
   }
 
   protected String get_command_for_assert_current_value_of_sequence_is() {

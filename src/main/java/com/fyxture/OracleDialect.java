@@ -27,24 +27,26 @@ class OracleDialect extends Dialect {
   void insert(InsertCommand ic) throws Throwable {
     String column = Data.sequence(ic.table, "column");
     logger.debug(column);
-    if(column != null && !ic.columns.contains(column)){
-      fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, Data.sequence(ic.table)));
-      ic.columns.add(column);
-      ic.values.add(current(ic.table));
-    }else{
-      logger.debug(ic.values.get(ic.columns.indexOf(column)));
-      if(ic.values.get(ic.columns.indexOf(column)) == null){
-        logger.info(column);
-        fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, Data.sequence(column)));
-        ic.values.set(ic.columns.indexOf(column), current(ic.table));
-      }else{
-        Integer start = i(ic.values.get(ic.columns.indexOf(column)));
-        logger.debug(start);
-        fyxture.execute(fmt(ORACLE_SEQUENCE_DROP, Data.sequence(ic.table)));
-        fyxture.execute(fmt(ORACLE_SEQUENCE_CREATE, Data.sequence(ic.table), start, start));
-        fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, Data.sequence(ic.table)));
-        ic.values.set(ic.columns.indexOf(column), current(ic.table));
-      }
+    if(column != null){
+    	if(!ic.columns.contains(column)){
+    		fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, Data.sequence(ic.table)));
+        ic.columns.add(column);
+        ic.values.add(current(ic.table));
+    	}else{
+    		logger.debug(ic.values.get(ic.columns.indexOf(column)));
+        if(ic.values.get(ic.columns.indexOf(column)) == null){
+          logger.info(column);
+          fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, Data.sequence(column)));
+          ic.values.set(ic.columns.indexOf(column), current(ic.table));
+        }else{
+          Integer start = i(ic.values.get(ic.columns.indexOf(column)));
+          logger.debug(start);
+          fyxture.execute(fmt(ORACLE_SEQUENCE_DROP, Data.sequence(ic.table)));
+          fyxture.execute(fmt(ORACLE_SEQUENCE_CREATE, Data.sequence(ic.table), start, start));
+          fyxture.execute(fmt(ORACLE_SEQUENCE_NEXT, Data.sequence(ic.table)));
+          ic.values.set(ic.columns.indexOf(column), current(ic.table));
+        }
+    	}
     }
     super.insert(ic);
   }
