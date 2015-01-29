@@ -88,7 +88,7 @@ public class Data {
   }
 
   public static Collection table_names() throws Throwable {
-    return list(get("config", "common.table.clear"));
+    return list(get("config", "common.table.clear.order"));
   }
 
   public static Object loader(String name) throws Throwable {
