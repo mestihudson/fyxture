@@ -12,4 +12,8 @@ public class H2ITest extends FyxtureITest {
   protected String get_command_for_assert_current_value_of_sequence_is(String name) {
     return "SELECT CURRVAL('"+ name +"')";
   }
+
+  protected String sequence_for(String name) {
+    return "SQ_ID_" + name;
+  }
 }

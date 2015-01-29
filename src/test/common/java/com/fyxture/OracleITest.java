@@ -21,4 +21,8 @@ public class OracleITest extends FyxtureITest {
   protected String get_command_for_assert_current_value_of_sequence_is(String name) {
     return "SELECT " + name + ".CURRVAL FROM DUAL";
   }
+
+  protected String sequence_for(String name) {
+    return "SQ_ID_" + name;
+  }
 }

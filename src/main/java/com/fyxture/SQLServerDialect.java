@@ -19,7 +19,11 @@ class SQLServerDialect extends Dialect {
   }
 
   void reset_sequence(String table) throws Throwable {
-    fyxture.execute(fmt(SQLSERVER_SEQUENCE_ALTER, table, "1", "1"));
+  	set_sequence(table, 0);
+  }
+
+  private void set_sequence(String table, Integer value) throws Throwable {
+  	fyxture.execute(fmt(SQLSERVER_SEQUENCE_ALTER, table, String.valueOf(value)));
   }
 
   void insert(InsertCommand ic) throws Throwable {
@@ -29,11 +33,15 @@ class SQLServerDialect extends Dialect {
     }else{
       if(!ic.columns.contains(sequence)){
         ic.columns.add(sequence);
-        ic.values.add(current(ic.table));
+        Integer curr = current(ic.table) + 1;
+        set_sequence(ic.table, curr);
+        ic.values.add(curr);
       }else{
         Object value = ic.values.get(ic.columns.indexOf(sequence));
         if(value == null){
-          value = current(ic.table);
+          Integer curr = current(ic.table) + 1;
+          set_sequence(ic.table, curr);
+          value = curr;
         }
       }
       fyxture.execute(fmt(SQLSERVER_IDENTITY_INSERT, ic.table, "ON"));
@@ -45,6 +53,7 @@ class SQLServerDialect extends Dialect {
   Integer current(String table) throws Throwable {
     ResultSet rs = fyxture.query(fmt(SQLSERVER_SEQUENCE_CURRENT, table));
     rs.next();
-    return rs.getInt(1);
+    Integer result = rs.getInt(1);
+    return result;
   }
 }

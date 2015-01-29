@@ -18,4 +18,12 @@ public class SQLServerITest extends FyxtureITest {
   protected String get_command_for_assert_current_value_of_sequence_is(String name) {
     return "SELECT IDENT_CURRENT('" + name + "')";
   }
+
+  protected void assert_current_value_of_sequence_is(Integer value, String name) throws Throwable {
+    super.assert_current_value_of_sequence_is(value, name);
+  }
+
+  protected void assert_current_value_of_sequence_is(Integer value) throws Throwable {
+    assert_current_value_of_sequence_is(value, "LIVRO");
+  }
 }

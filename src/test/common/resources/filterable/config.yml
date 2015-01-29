@@ -33,6 +33,7 @@ datasource:
     password: fyxture
   sqlserver:
     dialect: sqlserver
+    schema: dbo
     driver: net.sourceforge.jtds.jdbc.Driver
     url: jdbc:jtds:sqlserver://w7:1433/fyxture
     user: sa

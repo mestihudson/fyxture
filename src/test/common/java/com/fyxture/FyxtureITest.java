@@ -105,19 +105,23 @@ public abstract class FyxtureITest {
     Fyxture.clear();
     Fyxture.insert("AUTOR", "segundo-extend");
     assert_have("SELECT * FROM AUTOR WHERE NOME='Segundo'");
-    assert_current_value_of_sequence_is(1, "SQ_ID_AUTOR");
+    assert_current_value_of_sequence_is(1, sequence_for("AUTOR"));
 
     logger.debug("");
     Fyxture.clear();
     Fyxture.insert("AUTOR", "referencia-indireta-extend");
     assert_have("SELECT * FROM AUTOR WHERE NOME='Referencia Indireta' AND VERSION = 1");
-    assert_current_value_of_sequence_is(1, "SQ_ID_AUTOR");
+    assert_current_value_of_sequence_is(1, sequence_for("AUTOR"));
 
     logger.debug("");
     Fyxture.clear();
     Fyxture.insert("AUTOR", "outra-referencia");
     assert_have("SELECT * FROM AUTOR WHERE NOME='Terceiro' AND VERSION = 1");
-    assert_current_value_of_sequence_is(1, "SQ_ID_AUTOR");
+    assert_current_value_of_sequence_is(1, sequence_for("AUTOR"));
+  }
+
+  protected String sequence_for(String name) {
+    return name;
   }
 
   @Test public void named_insert() throws Throwable {
