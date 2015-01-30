@@ -370,6 +370,7 @@
     <profile>
       <id>noskip</id>
       <properties>
+        <skip.h2>false</skip.h2>
         <skip.oracle>false</skip.oracle>
         <skip.sqlserver>false</skip.sqlserver>
       </properties>

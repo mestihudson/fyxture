@@ -1,11 +1,12 @@
 package com.fyxture;
 
-import static com.fyxture.Utils.*;
-
-import org.apache.log4j.Logger;
+import static com.fyxture.Utils.fmt;
+import static com.fyxture.Utils.s;
 
 import java.sql.ResultSet;
-import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 class SQLServerDialect extends Dialect {
   private static Logger logger = Logger.getLogger(SQLServerDialect.class);
@@ -18,7 +19,7 @@ class SQLServerDialect extends Dialect {
     super(fyxture);
   }
 
-  void reset_sequence(String table) throws Throwable {
+  void reset(String table) throws Throwable {
   	set_sequence(table, 0);
   }
 
@@ -27,23 +28,25 @@ class SQLServerDialect extends Dialect {
   }
 
   void insert(InsertCommand ic) throws Throwable {
-    String sequence = Data.sequence(ic.table, "column");
-    if(sequence == null){
+  	Map sequences = Utils.m(Config.ds().sequences(ic.table));
+    if(sequences == null || sequences.isEmpty()){
       super.insert(ic);
     }else{
-      if(!ic.columns.contains(sequence)){
-        ic.columns.add(sequence);
-        Integer curr = current(ic.table) + 1;
-        set_sequence(ic.table, curr);
-        ic.values.add(curr);
-      }else{
-        Object value = ic.values.get(ic.columns.indexOf(sequence));
-        if(value == null){
+    	for(Object sequence : sequences.keySet()){
+        if(!ic.columns.contains(sequence)){
+          ic.columns.add(s(sequence));
           Integer curr = current(ic.table) + 1;
           set_sequence(ic.table, curr);
-          value = curr;
+          ic.values.add(curr);
+        }else{
+          Object value = ic.values.get(ic.columns.indexOf(sequence));
+          if(value == null){
+            Integer curr = current(ic.table) + 1;
+            set_sequence(ic.table, curr);
+            value = curr;
+          }
         }
-      }
+    	}
       fyxture.execute(fmt(SQLSERVER_IDENTITY_INSERT, ic.table, "ON"));
       super.insert(ic);
       fyxture.execute(fmt(SQLSERVER_IDENTITY_INSERT, ic.table, "OFF"));

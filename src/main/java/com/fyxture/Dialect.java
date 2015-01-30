@@ -1,10 +1,8 @@
 package com.fyxture;
 
-import static com.fyxture.Utils.*;
+import static com.fyxture.Utils.fmt;
 
 import org.apache.log4j.Logger;
-
-import java.util.List;
 
 abstract class Dialect {
   private static Logger logger = Logger.getLogger(Dialect.class);
@@ -34,5 +32,12 @@ abstract class Dialect {
     return COUNT;
   }
 
-  abstract void reset_sequence(String table) throws Throwable;
+  public void clear(String table) throws Throwable {
+    delete(table);
+    if(!Utils.m(Config.ds().sequences(table)).isEmpty()){
+    	reset(table);
+    }
+  }
+
+  abstract void reset(String table) throws Throwable;
 }

@@ -1,20 +1,22 @@
 package com.fyxture;
 
+import static com.fyxture.Utils.fmt;
+import static com.fyxture.Utils.list;
+import static com.fyxture.Utils.m;
+import static com.fyxture.Utils.s;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
-import org.apache.commons.io.FileUtils;
-
-import static com.fyxture.Utils.*;
 
 public class Data {
   private static Logger logger = Logger.getLogger(Data.class);
@@ -111,6 +113,10 @@ public class Data {
     return s(get("config", "common.table.suffix"));
   }
 
+  public static String driver() throws Throwable {
+    return driver(datasource());
+  }
+
   public static String driver(String datasource) throws Throwable {
     return s(get("config", fmt("datasource.%s.driver", datasource)));
   }
@@ -160,5 +166,21 @@ public class Data {
       }
       return target;
     }
+  }
+
+	public static Map sequences(String name) throws Throwable {
+		Object result = get("config", fmt("datasource.%s.sequences", name));
+		if(result == null) {
+			result = new LinkedHashMap();
+		}
+	  return m(result);
+  }
+
+	public static List clear_excludes(String name) throws Throwable {
+		Object result = get("config", fmt("datasource.%s.clear.excludes", name));
+		if(result == null) {
+			result = new ArrayList();
+		}
+	  return list(result);
   }
 }

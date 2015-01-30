@@ -62,7 +62,7 @@ public abstract class FyxtureITest {
     }
   }
 
-  private void clear_db() throws Throwable {
+  protected void clear_db() throws Throwable {
     Flyway flyway = new Flyway();
     flyway.setDataSource(URL, USER, PASSWORD);
     flyway.setSqlMigrationSuffix("." + DATASOURCE + ".sql");
@@ -78,7 +78,9 @@ public abstract class FyxtureITest {
   @Test public void clear() throws Throwable {
     logger.debug("");
     clear_db();
-    create();
+    create("INSERT INTO LIVRO (ID, VERSION, ANO, TITULO) VALUES (1, 0, 2015, 'Livro')");
+    create("INSERT INTO AUTOR (ID, VERSION, NOME) VALUES (1, 0, 'Autor')");
+    create("INSERT INTO AUTOR_LIVRO (AUTOR_ID, LIVRO_ID) VALUES (1, 1)");
     Fyxture.clear();
     assert_cleaned();
   }
@@ -215,7 +217,12 @@ public abstract class FyxtureITest {
 
   protected void create(Integer id, Integer version, Integer ano, String titulo) throws Throwable {
     logger.debug(fmt("%d %d %d %s", id, version, ano, titulo));
-    statement.execute(fmt("INSERT INTO LIVRO (ID, VERSION, ANO, TITULO) VALUES (%d, %d, %d, '%s')", id, version, ano, titulo));
+    create(fmt("INSERT INTO LIVRO (ID, VERSION, ANO, TITULO) VALUES (%d, %d, %d, '%s')", id, version, ano, titulo));
+  }
+
+  protected void create(String command) throws Throwable {
+    logger.debug(command);
+    statement.execute(command);
   }
 
   private void create(Integer id) throws Throwable {
@@ -228,9 +235,11 @@ public abstract class FyxtureITest {
     create(1);
   }
 
-  private void assert_cleaned() throws Throwable {
+  protected void assert_cleaned() throws Throwable {
     logger.debug("");
     Assert.assertThat(statement.executeQuery("SELECT * FROM LIVRO").next(), Matchers.equalTo(false));
+    Assert.assertThat(statement.executeQuery("SELECT * FROM AUTOR").next(), Matchers.equalTo(false));
+    Assert.assertThat(statement.executeQuery("SELECT * FROM AUTOR_LIVRO").next(), Matchers.equalTo(false));
   }
 
   private void assert_have(Integer quantity, String table) throws Throwable {

@@ -15,7 +15,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,18 +61,9 @@ public class Fyxture {
 
   public static void clear() throws Throwable {
     init();
-    Map tables = Data.tables();
-    Collection table_names = Data.table_names();
-    if(table_names == null || table_names.isEmpty()){
-      table_names = tables.keySet();
-    }
-    logger.debug(tables);
-    logger.debug(table_names);
-    for(Object table : table_names) {
-      dialect.delete(s(table));
-      if(tables.containsKey(table)){
-        dialect.reset_sequence(s(table));
-      }
+    List<String> tables = Base.tables();
+    for(String table : tables){
+      dialect.clear(table);
     }
   }
 

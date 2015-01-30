@@ -11,7 +11,7 @@ common:
     # identificador das instâncias padrão das tabelas
     default: default
     # ordem em que as tabelas devem sofrer 'delete' durante clear()
-    clear: [AUTOR_LIVRO, LIVRO, AUTOR]
+    #clear: [AUTOR_LIVRO, LIVRO, AUTOR]
   verify:
     excludes: [schema_version]
 
@@ -24,6 +24,14 @@ datasource:
     url: jdbc:h2:target/fyxture
     user: sa
     password:
+    sequences:
+      LIVRO:
+        ID: SQ_ID_LIVRO
+      AUTOR:
+        ID: SQ_ID_AUTOR
+    clear:
+      excludes: [schema_version]
+
   oracle:
     dialect: oracle
     schema: FYXTURE
@@ -31,6 +39,14 @@ datasource:
     url: jdbc:oracle:thin:@//fyxture:1521/xe
     user: fyxture
     password: fyxture
+    sequences:
+      LIVRO:
+        ID: SQ_ID_LIVRO
+      AUTOR:
+        ID: SQ_ID_AUTOR
+    clear:
+      excludes: [schema_version]
+
   sqlserver:
     dialect: sqlserver
     schema: dbo
@@ -38,6 +54,13 @@ datasource:
     url: jdbc:jtds:sqlserver://w7:1433/fyxture
     user: sa
     password: s3nh@
+    sequences:
+      LIVRO:
+        ID:
+      AUTOR:
+        ID:
+    clear:
+      excludes: [schema_version]
     # use aspas simples (') para forçar um candidato a número como string
     # password: '11111111'
     # use aspas simples (') para quotar strings que devem possuir aspas duplas no início e no fim
@@ -47,19 +70,19 @@ datasource:
     # use '$' para não tratar o elemento seguinte como string, ou seja, não quotar a expressão
     # password: $newid()
 
-sequence: [SQ_ID_LIVRO, SQ_ID_AUTOR]
+# sequence: [SQ_ID_LIVRO, SQ_ID_AUTOR]
 
-table:
-  LIVRO:
-    sequence:
-      # SQ_ID_LIVRO: ID
-      name: SQ_ID_LIVRO
-      column: ID
-  AUTOR:
-    sequence:
-      # SQ_ID_AUTOR: ID
-      name: SQ_ID_AUTOR
-      column: ID
+# table:
+#   LIVRO:
+#     sequence:
+#       # SQ_ID_LIVRO: ID
+#       name: SQ_ID_LIVRO
+#       column: ID
+#   AUTOR:
+#     sequence:
+#       # SQ_ID_AUTOR: ID
+#       name: SQ_ID_AUTOR
+#       column: ID
 
 load:
   inicial: [AUTOR, LIVRO]
