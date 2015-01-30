@@ -1,7 +1,7 @@
 import org.junit.Test
 import org.yaml.snakeyaml.Yaml
 
-class FyxtureTest {
+class FyxtureClearTest {
   @Test void "clear"() {
     Yaml yaml = new Yaml()
     String document = """
