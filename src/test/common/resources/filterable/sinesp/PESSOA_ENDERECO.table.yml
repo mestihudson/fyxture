@@ -1,0 +1,5 @@
+#default:
+##not nullable attributies
+#   ID_PESSOA:  				#NUMBER(10,0)
+#   ID_ENDERECO:  				#NUMBER(10,0)
+##nullable attributies

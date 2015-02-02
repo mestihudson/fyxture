@@ -1,0 +1,14 @@
+#default:
+##not nullable attributies
+#   version_rank:  				#INTEGER(10,0)
+#   installed_rank:  				#INTEGER(10,0)
+#   version:  				#VARCHAR(50,0)
+#   description:  				#VARCHAR(200,0)
+#   type:  				#VARCHAR(20,0)
+#   script:  				#VARCHAR(1000,0)
+#   installed_by:  				#VARCHAR(100,0)
+#   installed_on:  				#TIMESTAMP(23,10)
+#   execution_time:  				#INTEGER(10,0)
+#   success:  				#BOOLEAN(1,0)
+##nullable attributies
+#   checksum:  				#INTEGER(10,0)

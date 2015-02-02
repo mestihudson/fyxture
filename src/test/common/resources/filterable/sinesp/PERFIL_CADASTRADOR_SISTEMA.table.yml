@@ -1,0 +1,5 @@
+#default:
+##not nullable attributies
+#   ID_PERFIL:  				#NUMBER(10,0)
+#   ID_CADASTRADOR_SISTEMA:  				#NUMBER(10,0)
+##nullable attributies

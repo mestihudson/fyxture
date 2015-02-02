@@ -1,0 +1,8 @@
+#default:
+##not nullable attributies
+#   ID_CORREIO_ELETRONICO:  				#NUMBER(10,0)
+##nullable attributies
+#   ED_EMAIL:  				#VARCHAR2(200)
+#   ID_PESSOA:  				#NUMBER(10,0)
+#   TP_CORREIO_ELETRONICO:  				#NUMBER(0,-127)
+#   SN_ENVIA_SENHA:  				#NUMBER(0,-127)

@@ -1,0 +1,10 @@
+#default:
+##not nullable attributies
+#   ID_REVISAO_AUDITORIA:  				#NUMBER(10,0)
+##nullable attributies
+#   DT_OPERACAO:  				#DATE(7)
+#   SG_SISTEMA:  				#VARCHAR2(20)
+#   CO_FUNCIONALIDADE:  				#VARCHAR2(30)
+#   CO_PESSOA:  				#VARCHAR2(11)
+#   ID_ESTRUTURA_ORGANIZACIONAL:  				#NUMBER(10,0)
+#   ED_IP:  				#VARCHAR2(30)

@@ -1,0 +1,6 @@
+#default:
+##not nullable attributies
+#   ID_PESSOA_TITULAR:  				#NUMBER(10,0)
+#   ID_SISTEMA:  				#NUMBER(10,0)
+##nullable attributies
+#   ID_PESSOA_SUPLENTE:  				#NUMBER(10,0)

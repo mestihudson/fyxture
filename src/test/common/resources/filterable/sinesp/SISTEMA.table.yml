@@ -1,0 +1,10 @@
+#default:
+##not nullable attributies
+#   ID_SISTEMA:  				#NUMBER(10,0)
+#   SG_SISTEMA:  				#VARCHAR2(20)
+#   NO_SISTEMA:  				#VARCHAR2(60)
+#   IN_SISTEMA:  				#CHAR(1)
+#   SN_ESPECIAL:  				#NUMBER(1,0)
+#   SN_SISTEMA_AUDITORIA:  				#NUMBER(1,0)
+##nullable attributies
+#   ED_URL_SISTEMA:  				#VARCHAR2(100)

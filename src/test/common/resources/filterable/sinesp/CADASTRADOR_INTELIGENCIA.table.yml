@@ -1,0 +1,6 @@
+#default:
+##not nullable attributies
+#   ID_CADASTRADOR_INTELIGENCIA:  				#NUMBER(10,0)
+#   ID_PESSOA:  				#NUMBER(10,0)
+#   SN_ATIVO:  				#NUMBER(1,0)
+##nullable attributies

@@ -14,7 +14,6 @@ public class Datasource {
   private final String password;
   private final List<String> tables;
 	private final Map sequences;
-	private final List clearExcludes;
 
 	public Datasource(String name) throws Throwable {
 		this.name = name;
@@ -26,7 +25,6 @@ public class Datasource {
 		this.password = Data.password(name);
 		this.tables = Base.tables();
 		this.sequences  = Data.sequences(name);
-		this.clearExcludes = Data.clear_excludes(name);
 	}
 
 	public Map sequences() {
@@ -39,9 +37,5 @@ public class Datasource {
 			result = new LinkedHashMap();
 		}
 		return result;
-  }
-
-	public boolean excluded(String table) {
-	  return clearExcludes.contains(table);
   }
 }

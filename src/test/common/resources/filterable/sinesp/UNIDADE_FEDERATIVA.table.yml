@@ -1,0 +1,7 @@
+#default:
+##not nullable attributies
+#   ID_UF:  				#NUMBER(10,0)
+#   ID_PAIS:  				#NUMBER(10,0)
+#   SG_UF:  				#CHAR(2)
+#   NO_UF:  				#VARCHAR2(50)
+##nullable attributies

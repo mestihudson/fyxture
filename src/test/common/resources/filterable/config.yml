@@ -12,8 +12,8 @@ common:
     default: default
     # ordem em que as tabelas devem sofrer 'delete' durante clear()
     #clear: [AUTOR_LIVRO, LIVRO, AUTOR]
-  verify:
-    excludes: [schema_version]
+#  verify:
+#    excludes: [schema_version]
 
 # lista de datasources que podem ser utilizados em init(...)
 datasource:
@@ -29,8 +29,8 @@ datasource:
         ID: SQ_ID_LIVRO
       AUTOR:
         ID: SQ_ID_AUTOR
-    clear:
-      excludes: [schema_version]
+    excludes: [schema_*]
+    unclear:
 
   oracle:
     dialect: oracle
@@ -44,8 +44,8 @@ datasource:
         ID: SQ_ID_LIVRO
       AUTOR:
         ID: SQ_ID_AUTOR
-    clear:
-      excludes: [schema_version]
+    excludes: [schema_*]
+    unclear: []
 
   sqlserver:
     dialect: sqlserver
@@ -59,8 +59,8 @@ datasource:
         ID:
       AUTOR:
         ID:
-    clear:
-      excludes: [schema_version]
+    excludes: [schema_*]
+    unclear: []
     # use aspas simples (') para forçar um candidato a número como string
     # password: '11111111'
     # use aspas simples (') para quotar strings que devem possuir aspas duplas no início e no fim
@@ -69,6 +69,54 @@ datasource:
     # password: "'11111111'"
     # use '$' para não tratar o elemento seguinte como string, ou seja, não quotar a expressão
     # password: $newid()
+
+  sinesp:
+    dialect: oracle
+    schema: SEGURANCA_MANUTENCAO
+    driver: oracle.jdbc.driver.OracleDriver
+    url: jdbc:oracle:thin:@//vm:1521/xe
+    user: SEGURANCA_MANUTENCAO
+    password: SEGURANCA_MANUTENCAO
+    excludes: [schema_*, ^H_*]
+    unclear: [TIPO_ESPEC_ESTRUT_ORG, MUNICIPIO, UNIDADE_FEDERATIVA, PAIS]
+    sequences:
+      PESSOA:
+        CO_IDENTIFICACAO: SQ_CO_IDENTIFICACAO
+        ID_PESSOA: SQ_ID_PESSOA
+      CADASTRADOR_INTELIGENCIA:
+        ID_CADASTRADOR_INTELIGENCIA: SQ_ID_CADASTRADOR_INTELIGENCIA
+      CADASTRADOR_SISTEMA:
+        ID_CADASTRADOR_SISTEMA: SQ_ID_CADASTRADOR_SISTEMA
+      CARGO:
+        ID_CARGO: SQ_ID_CARGO
+      CLASSIFICACAO_ESTRUTURA:
+        ID_CLASSIFICACAO_ESTRUTURA: SQ_ID_CLASSIFICACAO_ESTRUTURA
+      CORREIO_ELETRONICO:
+        ID_CORREIO_ELETRONICO: SQ_ID_CORREIO_ELETRONICO
+      ENDERECO:
+        ID_ENDERECO: SQ_ID_ENDERECO
+      ESTRUT_ORG_CADAST_SIST:
+        ID_ESTRUT_ORG_CADAST_SIST: SQ_ID_ESTRUT_ORG_CADAST_SIST
+      ESTRUT_ORG_PESSOA_SIST:
+        ID_ESTRUT_ORG_PESSOA_SIST: SQ_ID_ESTRUT_ORG_PESSOA_SIST
+      ESTRUTURA_ORGANIZACIONAL:
+        ID_ESTRUTURA_ORGANIZACIONAL: SQ_ID_ESTRUTURA_ORGANIZACIONAL
+      FUNCIONALIDADE:
+        ID_FUNCIONALIDADE: SQ_ID_FUNCIONALIDADE
+      HISTORICO_SITUACAO:
+        ID_HISTORICO_SITUACAO: SQ_ID_HISTORICO_SITUACAO
+      PERFIL:
+        ID_PERFIL: SQ_ID_PERFIL
+      PESSOA_ANEXO:
+        ID_PESSOA_ANEXO: SQ_ID_PESSOA_ANEXO
+      PESSOA_SISTEMA:
+        ID_PESSOA_SISTEMA: SQ_ID_PESSOA_SISTEMA
+      REVISAO_AUDITORIA:
+        ID_REVISAO_AUDITORIA: SQ_ID_REVISAO_AUDITORIA
+      SISTEMA:
+        ID_SISTEMA: SQ_ID_SISTEMA
+      TELEFONE:
+        ID_TELEFONE: SQ_ID_TELEFONE
 
 # sequence: [SQ_ID_LIVRO, SQ_ID_AUTOR]
 

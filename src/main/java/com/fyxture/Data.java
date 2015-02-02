@@ -84,6 +84,9 @@ public class Data {
   }
 
   public static String datasource() throws Throwable {
+  	if(datasource == null) {
+  		datasource(s(get("config","common.datasource.default")));
+  	}
   	return datasource;
   }
 
@@ -186,8 +189,16 @@ public class Data {
 	  return m(result);
   }
 
-	public static List clear_excludes(String name) throws Throwable {
-		Object result = get("config", fmt("datasource.%s.clear.excludes", name));
+	public static List excludes(String name) throws Throwable {
+		Object result = get("config", fmt("datasource.%s.excludes", name));
+		if(result == null) {
+			result = new ArrayList();
+		}
+	  return list(result);
+  }
+
+	public static List<String> unclear(String name) throws Throwable {
+		Object result = get("config", fmt("datasource.%s.unclear", name));
 		if(result == null) {
 			result = new ArrayList();
 		}

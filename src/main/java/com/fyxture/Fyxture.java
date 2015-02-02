@@ -61,7 +61,7 @@ public class Fyxture {
 
   public static void clear() throws Throwable {
     init();
-    List<String> tables = Base.tables();
+    List<String> tables = Base.cleanables();
     for(String table : tables){
       dialect.clear(table);
     }
@@ -161,7 +161,7 @@ public class Fyxture {
       String pattern = "count~(";
       Integer index = sp.indexOf(pattern);
       if(index > -1){
-        List c = dbtables();
+        List c = Base.tables();
         sp = sp.substring(pattern.length(), sp.length() - 1);
         List tables = splitrim(sp, ",");
         for(Object t : c) {
@@ -275,32 +275,14 @@ public class Fyxture {
       if(!rs.getString(11).equals("0")){
         fullsb.append(cat("\n#   ", rs.getString(4), ":  \t\t\t\t#", rs.getString(6), "(", rs.getString(7), rs.getString(9) == null ? "" : ",", rs.getString(9) == null ? "" : rs.getString(9), ")"));
       }
-      System.out.println("" + rsmd.getColumnCount());
+      logger.debug("" + rsmd.getColumnCount());
       for(int i = 1; i <= rsmd.getColumnCount(); i++){
-        System.out.println(cat("" + i, rsmd.getColumnName(i), " : ", rs.getString(i)));
+        logger.debug(cat("" + i, rsmd.getColumnName(i), " : ", rs.getString(i)));
       }
     }
     fullsb.append("\n");
     minsb.append(fullsb.toString());
     return minsb.toString();
-  }
-
-  private static List<String> dbtables() throws Throwable {
-    return dbtables("%");
-  }
-
-  private static List<String> dbtables(final String pattern) throws Throwable {
-    List excludes = Data.excludes();
-    String schema = Data.schema(datasource);
-    List<String> c = new ArrayList<String>();
-    ResultSet rs = connection.getMetaData().getTables(null, schema, pattern, new String[] {"TABLE"});
-    while(rs.next()){
-      String table = rs.getString(3);
-      if(!excludes.contains(table)){
-        c.add(table);
-      }
-    }
-    return c;
   }
 
   private Fyxture(String driver, String url, String user, String password, String dialect) throws Throwable {
@@ -312,11 +294,12 @@ public class Fyxture {
 
   private void auto() throws Throwable {
     String auto = Data.auto();
-    logger.debug(dbtables());
+    List<String> tables = Base.tables();
+    logger.debug(tables);
     if(auto != null){
       String suffix = Data.suffix();
       logger.debug(suffix);
-      for(String table : dbtables()){
+      for(String table : tables){
         String filename = cat(datasource, "/", table, ".", suffix, ".yml");
         logger.debug(filename);
         try{

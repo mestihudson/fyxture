@@ -1,0 +1,11 @@
+#default:
+##not nullable attributies
+#   ID_ENDERECO:  				#NUMBER(10,0)
+#   ID_UF_ENDERECO:  				#NUMBER(10,0)
+#   ID_MUNICIPIO_ENDERECO:  				#NUMBER(10,0)
+#   ED_LOGRADOURO:  				#VARCHAR2(200)
+#   ED_CEP:  				#VARCHAR2(8)
+##nullable attributies
+#   ED_NUMERO:  				#VARCHAR2(10)
+#   ED_COMPLEMENTO:  				#VARCHAR2(200)
+#   ED_BAIRRO:  				#VARCHAR2(50)
