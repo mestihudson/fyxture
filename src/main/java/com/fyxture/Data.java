@@ -21,6 +21,7 @@ import org.yaml.snakeyaml.Yaml;
 public class Data {
   private static Logger logger = Logger.getLogger(Data.class);
   private static Map<String, Object> map = new LinkedHashMap<String, Object>();
+  private static String datasource;
 
   private static Object load(String filename) throws Throwable {
     if(map.get(filename) == null) {
@@ -73,8 +74,17 @@ public class Data {
     return s(get("config", fmt("table.%s.sequence.%s", table, property)));
   }
 
+  public static String datasource(String descriptor) throws Throwable {
+  	if(descriptor == null) {
+ 			datasource = s(get("config","common.datasource.default"));
+  	}else{
+  		datasource = descriptor;
+  	}
+    return datasource;
+  }
+
   public static String datasource() throws Throwable {
-    return s(get("config","common.datasource.default"));
+  	return datasource;
   }
 
   public static Object verify(String name) throws Throwable {

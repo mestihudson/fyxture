@@ -140,6 +140,7 @@ public class Fyxture {
     logger.debug(datasourcename);
     if(!datasourcename.equals(datasource)){
       datasource = datasourcename;
+      Data.datasource(datasourcename);
       instance = getInstance();
     }
     logger.debug(instance);
