@@ -1,7 +1,0 @@
-#default:
-##not nullable attributies
-#   ID_PESSOA_ANEXO:  				#NUMBER(10,0)
-#   ID_PESSOA:  				#NUMBER(10,0)
-#   NO_PESSOA_ANEXO:  				#VARCHAR2(100)
-#   AQ_PESSOA_ANEXO:  				#BLOB(4000)
-##nullable attributies

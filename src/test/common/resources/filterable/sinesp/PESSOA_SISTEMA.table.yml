@@ -1,9 +1,0 @@
-#default:
-##not nullable attributies
-#   ID_PESSOA_SISTEMA:  				#NUMBER(10,0)
-#   ID_SISTEMA:  				#NUMBER(10,0)
-#   ID_PESSOA:  				#NUMBER(10,0)
-#   SN_PESSOA_IRRESTRITA:  				#NUMBER(1,0)
-#   SN_ATIVO:  				#NUMBER(10,0)
-##nullable attributies
-#   ID_ESTRUTURA_ORGANIZACIONAL:  				#NUMBER(10,0)

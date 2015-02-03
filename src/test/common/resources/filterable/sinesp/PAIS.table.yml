@@ -1,7 +1,0 @@
-#default:
-##not nullable attributies
-#   ID_PAIS:  				#NUMBER(10,0)
-#   NO_PAIS:  				#VARCHAR2(50)
-#   SG_PAIS:  				#VARCHAR2(3)
-#   CO_PAIS:  				#NUMBER(3,0)
-##nullable attributies

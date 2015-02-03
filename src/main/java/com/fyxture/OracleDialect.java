@@ -22,7 +22,7 @@ class OracleDialect extends Dialect {
 
   void reset(String table) throws Throwable {
   	Map sequences = Utils.m(Config.ds().sequences(table));
-  	logger.info(sequences);
+  	logger.debug(sequences);
   	for(Object sequence : sequences.keySet()){
   		String sequence_name = Utils.s(sequences.get(sequence));
 	    fyxture.execute(fmt(ORACLE_SEQUENCE_DROP, sequence_name));

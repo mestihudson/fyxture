@@ -1,7 +1,0 @@
-#default:
-##not nullable attributies
-#   ID_MUNICIPIO:  				#NUMBER(10,0)
-#   ID_UF:  				#NUMBER(10,0)
-#   NO_MUNICIPIO:  				#VARCHAR2(50)
-##nullable attributies
-#   CO_IBGE:  				#NUMBER(10,0)

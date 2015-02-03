@@ -1,5 +1,0 @@
-#default:
-##not nullable attributies
-#   ID_CLASSIFICACAO_ESTRUTURA:  				#NUMBER(10,0)
-#   NO_CLASSIFICACAO_ESTRUTURA:  				#VARCHAR2(40)
-##nullable attributies

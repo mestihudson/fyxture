@@ -1,5 +1,0 @@
-#default:
-##not nullable attributies
-#   ID_SISTEMA:  				#NUMBER(10,0)
-#   ID_PESSOA_SISTEMA:  				#NUMBER(10,0)
-##nullable attributies

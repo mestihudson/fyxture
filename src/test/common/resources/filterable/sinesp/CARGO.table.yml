@@ -1,5 +1,0 @@
-#default:
-##not nullable attributies
-#   ID_CARGO:  				#NUMBER(10,0)
-#   NO_CARGO:  				#VARCHAR2(60)
-##nullable attributies

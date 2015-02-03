@@ -1,6 +1,0 @@
-#default:
-##not nullable attributies
-#   ID_TIPO_ESPECIALIZACAO:  				#NUMBER(10,0)
-#   NO_TIPO_ESPECIALIZACAO:  				#VARCHAR2(60)
-##nullable attributies
-#   SG_TIPO_ESPECIALIZACAO:  				#VARCHAR2(10)

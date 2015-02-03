@@ -1,8 +1,0 @@
-#default:
-##not nullable attributies
-#   ID_CADASTRADOR_SISTEMA:  				#NUMBER(10,0)
-#   ID_SISTEMA:  				#NUMBER(10,0)
-#   ID_PESSOA:  				#NUMBER(10,0)
-#   ID_ESTRUTURA_ORGANIZACIONAL:  				#NUMBER(10,0)
-#   SN_ATIVO:  				#NUMBER(10,0)
-##nullable attributies
