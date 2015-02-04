@@ -66,69 +66,72 @@ public class Base {
       return tables(Data.datasource(), pattern);
     }else{
     	if(!tables.containsKey(ds)){
-      	List<String> all = new ArrayList<String>();
-        ResultSet rs = connection(ds).getMetaData().getTables(null, Data.schema(ds), pattern, new String[] {"TABLE"});
-        while(rs.next()){
-          String table = rs.getString(3);
-          all.add(table);
-        }
-        List<String> excludes = Data.excludes(ds);
-        int count = 0;
-        while(true){
-          String table = all.get(count);
-          boolean excluded = false;
-          for(String item : excludes){
-            if(Pattern.compile(item).matcher(table).find()){
-              excluded = true;
-              break;
+    		List<String> all = Data.tables_order(ds);
+    		if(all.isEmpty()){
+        	all = new ArrayList<String>();
+          ResultSet rs = connection(ds).getMetaData().getTables(null, Data.schema(ds), pattern, new String[] {"TABLE"});
+          while(rs.next()){
+            String table = rs.getString(3);
+            all.add(table);
+          }
+          List<String> excludes = Data.excludes(ds);
+          int count = 0;
+          while(true){
+            String table = all.get(count);
+            boolean excluded = false;
+            for(String item : excludes){
+              if(Pattern.compile(item).matcher(table).find()){
+                excluded = true;
+                break;
+              }
+            }
+            if(excluded){
+              all.remove(table);
+            }else{
+              count++;
+            }
+            if(count == all.size()) {
+            	break;
             }
           }
-          if(excluded){
-            all.remove(table);
-          }else{
-            count++;
+          count = 0;
+          List<String> before = new ArrayList<String>();
+          List<String> after = new ArrayList<String>();
+          List<String> visited = new ArrayList<String>();
+          boolean found = false;
+          while(true){
+          	String table = all.get(count);
+          	ResultSet ekrs = connection(ds).getMetaData().getExportedKeys(null, Data.schema(ds), table);
+           	while(ekrs.next()){
+           		String importer = ekrs.getString(7);
+           		if(all.indexOf(importer) > all.indexOf(table)){
+           			before.clear();
+           			before.addAll(all.subList(0, count));
+           			after.clear();
+           			after.addAll(all.subList(count, all.size()));
+           			all.clear();
+           			before.add(importer);
+           			after.remove(importer);
+           			all.addAll(before);
+           			all.addAll(after);
+           			found = true;
+           			break;
+           		}
+           	}
+           	if(found){
+           		found = false;
+           		continue;
+           	}else{
+             	if(!visited.contains(table)){
+             		visited.add(table);
+             	}         		
+           	}
+         		count++;
+            if(count == all.size()) {
+            	break;
+            }
           }
-          if(count == all.size()) {
-          	break;
-          }
-        }
-        count = 0;
-        List<String> before = new ArrayList<String>();
-        List<String> after = new ArrayList<String>();
-        List<String> visited = new ArrayList<String>();
-        boolean found = false;
-        while(true){
-        	String table = all.get(count);
-        	ResultSet ekrs = connection(ds).getMetaData().getExportedKeys(null, Data.schema(ds), table);
-         	while(ekrs.next()){
-         		String importer = ekrs.getString(7);
-         		if(all.indexOf(importer) > all.indexOf(table)){
-         			before.clear();
-         			before.addAll(all.subList(0, count));
-         			after.clear();
-         			after.addAll(all.subList(count, all.size()));
-         			all.clear();
-         			before.add(importer);
-         			after.remove(importer);
-         			all.addAll(before);
-         			all.addAll(after);
-         			found = true;
-         			break;
-         		}
-         	}
-         	if(found){
-         		found = false;
-         		continue;
-         	}else{
-           	if(!visited.contains(table)){
-           		visited.add(table);
-           	}         		
-         	}
-       		count++;
-          if(count == all.size()) {
-          	break;
-          }
-        }
+    		}
         tables.put(ds, all);
     	}
     	return tables.get(ds);

@@ -80,7 +80,7 @@ public abstract class FyxtureITest {
     clear_db();
     create("INSERT INTO LIVRO (ID, VERSION, ANO, TITULO) VALUES (1, 0, 2015, 'Livro')");
     create("INSERT INTO AUTOR (ID, VERSION, NOME) VALUES (1, 0, 'Autor')");
-    create("INSERT INTO AUTOR_LIVRO (AUTOR_ID, LIVRO_ID) VALUES (1, 1)");
+    create("INSERT INTO AUTOR_LIVRO (AUTOR_ID, LIVRO_ID, DATA_CADASTRO) VALUES (1, 1, {ts '2014-10-24 11:41:06.200'})");
     Fyxture.clear();
     assert_cleaned();
   }

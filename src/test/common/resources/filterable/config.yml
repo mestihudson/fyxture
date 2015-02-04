@@ -24,13 +24,15 @@ datasource:
     url: jdbc:h2:target/fyxture
     user: sa
     password:
+    tables:
+      order: [AUTOR_LIVRO, AUTOR, LIVRO]
+      excludes: [schema_version]
+      unclear: []
     sequences:
       LIVRO:
         ID: SQ_ID_LIVRO
       AUTOR:
         ID: SQ_ID_AUTOR
-    excludes: [schema_*]
-    unclear:
 
   oracle:
     dialect: oracle

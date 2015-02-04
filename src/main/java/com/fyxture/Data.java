@@ -27,9 +27,19 @@ public class Data {
     if(map.get(filename) == null) {
       String filepath = Utils.class.getClassLoader().getResource(filename.concat(".yml")).getPath();
       logger.debug(filepath);
-      InputStream input = new FileInputStream(new File(filepath));
+      File file = new File(filepath);
+      if(!file.exists()){
+        throw new FyxtureFileNotFound(filename);
+      }
+      InputStream input = new FileInputStream(file);
       Yaml yaml = new Yaml();
-      map.put(filename, yaml.load(input));
+      Object o;
+      try{
+        o = yaml.load(input);
+      }catch(Throwable t) {
+        throw new FyxtureFileCoundNotBeLoaded(filename, t.getMessage());
+      }
+      map.put(filename, o);
     }
     return map.get(filename);
   }
@@ -190,7 +200,7 @@ public class Data {
   }
 
 	public static List excludes(String name) throws Throwable {
-		Object result = get("config", fmt("datasource.%s.excludes", name));
+		Object result = get("config", fmt("datasource.%s.tables.excludes", name));
 		if(result == null) {
 			result = new ArrayList();
 		}
@@ -198,7 +208,15 @@ public class Data {
   }
 
 	public static List<String> unclear(String name) throws Throwable {
-		Object result = get("config", fmt("datasource.%s.unclear", name));
+		Object result = get("config", fmt("datasource.%s.tables.unclear", name));
+		if(result == null) {
+			result = new ArrayList();
+		}
+	  return list(result);
+  }
+
+	public static List tables_order(String name) throws Throwable {
+		Object result = get("config", fmt("datasource.%s.tables.order", name));
 		if(result == null) {
 			result = new ArrayList();
 		}
