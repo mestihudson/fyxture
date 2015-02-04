@@ -9,11 +9,10 @@ default:
   LIVRO_ID: 2
   DATA_CADASTRO: ${ts '2014-10-24 11:41:06.200'}
 
-segundo-autor: [{
-  AUTOR_ID: 2,
-  LIVRO_ID: 2,
-  DATA_CADASTRO: !!str ${ts '2014-10-24 11:41:06.200'}
-}]
+workaround:
+  DATA_CADASTRO: ${ts '2014-10-24 11:41:06.200'}
+
+segundo-autor: [workaround, {AUTOR_ID: 2, LIVRO_ID: 2 }]
 
 terceiro:
   AUTOR_ID: 3

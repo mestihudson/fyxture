@@ -213,8 +213,8 @@ public class Fyxture {
           if(t instanceof String) {
             insert(s(t));
           }
-          logger.info(t != null ? t.getClass() : null);
-          logger.info(t != null ? t : null);
+          logger.debug(t != null ? t.getClass() : null);
+          logger.debug(t != null ? t : null);
           
         }
       }
