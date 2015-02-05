@@ -1,8 +1,10 @@
 import org.junit.Test
+import org.junit.Ignore
+
 import org.yaml.snakeyaml.Yaml
 
-class FyxtureClearTest {
-  @Test void "clear"() {
+class FyxtureITest {
+  @Test @Ignore void "test integração"() {
     Yaml yaml = new Yaml()
     String document = """
 common:

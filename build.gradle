@@ -1,8 +1,28 @@
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'maven'
+
+buildDir = 'target'
 
 repositories {
   mavenCentral()
+  mavenLocal()
+  maven {
+    url 'http://demoiselle.sourceforge.net/repository/release'
+  }
+}
+
+sourceSets {
+  test {
+    groovy {
+      srcDirs = ['src/test/common/groovy', 'src/test/unit/groovy', 'src/test/integration/groovy', 'src/test/e2e/groovy']
+    }
+    resources {
+      srcDirs = ['src/test/common/resources', 'src/test/unit/resources', 'src/test/integration/resources', 'src/test/e2e/resources']
+    }
+    output.resourcesDir = "$buildDir/classes/test"
+  }
 }
 
 dependencies {
@@ -11,4 +31,6 @@ dependencies {
   compile 'commons-io:commons-io:2.4'
 
   testCompile 'junit:junit:4.11'
+  testCompile 'br.gov.frameworkdemoiselle.component.behave:demoiselle-behave-parser-jbehave:1.4.0'
+  testCompile 'br.gov.frameworkdemoiselle.component.behave:demoiselle-behave-runner-webdriver:1.4.0'
 }
