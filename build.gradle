@@ -1,3 +1,5 @@
+defaultTasks 'clean', 'build'
+
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
 apply plugin: 'java'
@@ -23,6 +25,24 @@ sourceSets {
     }
     output.resourcesDir = "$buildDir/classes/test"
   }
+}
+
+test {
+  include '**/*UTest*'
+  exclude '**/*ITest*', '**/*ETest*'
+  testLogging {
+    events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+  }
+}
+
+task integration(type: Test) {
+  include '**/*ITest*'
+  exclude '**/*UTest*', '**/*ETest*'
+}
+
+task e2e(type: Test) {
+  include '**/*ETest*'
+  exclude '**/*UTest*', '**/*ITest*'
 }
 
 dependencies {
