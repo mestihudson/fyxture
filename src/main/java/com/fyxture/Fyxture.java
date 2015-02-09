@@ -233,6 +233,8 @@ public class Fyxture {
   void execute(String command) throws Throwable {
     logger.debug(command);
     statement.execute(command);
+    //evita que o sistema caia por insuficiencia de conexoes
+    Thread.sleep(100);
   }
 
   static ResultSet query(String command) throws Throwable {
