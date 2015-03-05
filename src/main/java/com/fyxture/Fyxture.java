@@ -180,7 +180,13 @@ public class Fyxture {
         sp = sp.substring(pattern.length(), sp.length() - 1);
         List tables = splitrim(sp, ",");
         for(Object t : tables) {
-          assert count(s(t).trim()) == i(v);
+          int actual = count(s(t).trim());
+          int excepted = i(v);
+          try{
+            assert actual == excepted;
+          }catch(Throwable e) {
+            throw new FyxtureVerifyFail(fmt("Table count for [%s] excepted <%d> but was <%d>", s(t), excepted, actual));
+          }
         }
       }
     }
